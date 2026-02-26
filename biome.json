@@ -12,6 +12,21 @@
 		"enabled": true,
 		"indentStyle": "tab"
 	},
+	"overrides": [
+		{
+			"includes": [
+				"src/**/*.ts",
+				"test/**/*.ts"
+			],
+			"linter": {
+				"rules": {
+					"style": {
+						"useFilenamingConvention": "off"
+					}
+				}
+			}
+		}
+	],
 	"linter": {
 		"enabled": true,
 		"rules": {
