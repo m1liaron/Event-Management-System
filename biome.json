@@ -6,7 +6,7 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"ignoreUnknown": ""
+		"ignoreUnknown": true
 	},
 	"formatter": {
 		"enabled": true,
@@ -21,7 +21,6 @@
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double",
-			"trailingComma": "es5",
 			"semicolons": "always"
 		}
 	},
