@@ -1,0 +1,35 @@
+{
+  "name": "event-management-system",
+  "version": "1.0.0",
+  "main": "index.js",
+  "lint-staged": {
+    "**/*.{ts,tsx}": [
+      "biome lint --write",
+      "biome check --write"
+    ]
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky",
+    "format": "biome format --write",
+    "format:check": "biome format --check",
+    "lint:check": "biome lint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m1liaron/Event-Management-System.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/m1liaron/Event-Management-System/issues"
+  },
+  "homepage": "https://github.com/m1liaron/Event-Management-System#readme",
+  "description": "",
+  "devDependencies": {
+    "@biomejs/biome": "2.4.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
+  }
+}
