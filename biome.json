@@ -14,10 +14,7 @@
 	},
 	"overrides": [
 		{
-			"includes": [
-				"src/**/*.ts",
-				"test/**/*.ts"
-			],
+			"includes": ["src/**/*.ts", "test/**/*.ts"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -36,11 +33,8 @@
 					"options": {
 						"strictCase": false,
 						"requireAscii": true,
-						"match": "%?(.+?)[.](.+)", 
-						"filenameCases": [
-							"camelCase",
-							"export"
-						]
+						"match": "%?(.+?)[.](.+)",
+						"filenameCases": ["camelCase", "export"]
 					}
 				}
 			}

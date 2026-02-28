@@ -15,7 +15,7 @@ import { UsersModule } from "./modules/users/users.module";
 		ConfigModule.forRoot({
 			isGlobal: true,
 			expandVariables: true,
-			validationSchema: envValidationSchema
+			validationSchema: envValidationSchema,
 		}),
 		TypeOrmModule.forRootAsync({
 			inject: [ConfigService],
