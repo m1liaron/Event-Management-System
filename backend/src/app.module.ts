@@ -14,11 +14,9 @@ import { UsersModule } from "./modules/users/users.module";
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
-			validationSchema: envValidationSchema,
+			expandVariables: true,
+			validationSchema: envValidationSchema
 		}),
-		EventsModule,
-		AuthModule,
-		UsersModule,
 		TypeOrmModule.forRootAsync({
 			inject: [ConfigService],
 			useFactory: (config: ConfigService) => ({
@@ -27,10 +25,14 @@ import { UsersModule } from "./modules/users/users.module";
 				port: config.getOrThrow<number>("DB_PORT"),
 				password: config.getOrThrow<string>("DB_PASSWORD"),
 				database: config.getOrThrow<string>("DB_NAME"),
+				username: config.getOrThrow<string>("DB_USER"),
 				autoLoadEntities: true,
 				synchronize: true,
 			}),
 		}),
+		EventsModule,
+		AuthModule,
+		UsersModule,
 		TypeOrmModule.forFeature([User]),
 	],
 	controllers: [AppController],

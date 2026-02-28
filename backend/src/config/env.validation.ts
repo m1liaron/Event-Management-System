@@ -8,12 +8,12 @@ export const envValidationSchema = yup.object({
 		)
 		.default(4000),
 
-	POSTGRES_USER: yup.string().required(),
-	POSTGRES_PASSWORD: yup
+	DB_USER: yup.string().required(),
+	DB_PASSWORD: yup
 		.string()
 		.transform((_, originalvalue) => String(originalvalue))
 		.required(),
-	POSTGRES_DB: yup.string().required(),
+	DB_NAME: yup.string().required(),
 
 	DB_HOST: yup.string().required(),
 	DB_PORT: yup
