@@ -7,9 +7,9 @@ import {
 	Patch,
 	Post,
 } from "@nestjs/common";
-import type { CreateEventDto } from "./dto/create-event.dto";
-import type { UpdateEventDto } from "./dto/update-event.dto";
-import type { EventsService } from "./events.service";
+import { CreateEventDto } from "./dto/create-event.dto";
+import { UpdateEventDto } from "./dto/update-event.dto";
+import { EventsService } from "./events.service";
 
 @Controller("events")
 export class EventsController {

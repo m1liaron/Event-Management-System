@@ -4,16 +4,14 @@
 	"main": "index.js",
 	"lint-staged": {
 		"**/*.{ts,tsx}": [
-			"biome lint --write",
-			"biome check --write"
-		]
+			"biome lint --write"		]
 	},
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"prepare": "husky",
 		"format": "biome format --write",
 		"format:check": "biome format --check",
-    "lint": "npx @biomejs/biome lint --write",
+		"lint": "npx @biomejs/biome lint --write",
 		"lint:check": "biome lint ."
 	},
 	"repository": {
