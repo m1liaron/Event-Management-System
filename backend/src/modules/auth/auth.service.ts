@@ -5,8 +5,8 @@ import {
 } from "@nestjs/common";
 import type { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
-import type { UsersService } from "../users/users.service";
 import type { User } from "../users/entities/user.entity";
+import type { UsersService } from "../users/users.service";
 import type { RegisterDto } from "./dto/register.dto";
 
 @Injectable()
