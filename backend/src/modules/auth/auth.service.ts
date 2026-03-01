@@ -21,7 +21,7 @@ export class AuthService {
 		if (existingUser) throw new ConflictException("Email already exists");
 
 		const hashedPassword = await bcrypt.hash(dto.password, 10);
-		const user = await this.usersService.create({
+		const user = await this.usersService.createUser({
 			...dto,
 			password: hashedPassword,
 		});
@@ -42,7 +42,7 @@ export class AuthService {
 	private generateToken(user: User) {
 		const payload = { sub: user.id, email: user.email };
 		return {
-			access_tone: this.jwtService.sign(payload),
+			access_token: this.jwtService.sign(payload),
 			user: { id: user.id, name: user.name, email: user.name },
 		};
 	}

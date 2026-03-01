@@ -18,14 +18,13 @@ export class UsersService {
 	}
 
 	async findByEmailWithPassword(email: string) {
-		return this.userRepo
-			.createQueryBuilder("user")
-			.addSelect("user.password")
-			.where("user.email = :email", { email })
-			.getOne();
+		return this.userRepo.findOne({
+			where: { email: email.trim() },
+			select: ["email", "password", "name"], // Explicitly list password here
+		});
 	}
 
-	async create(body: CreateUserDto) {
-		return this.userRepo.create(body);
+	async createUser(body: CreateUserDto) {
+		return this.userRepo.save(body);
 	}
 }
