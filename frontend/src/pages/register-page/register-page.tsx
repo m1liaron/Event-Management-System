@@ -1,23 +1,55 @@
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { RegisterSchema } from "../../common/schemas";
 import { Lock, Mail, User } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { toast, ToastContainer } from "react-toastify";
+import { apiPath, appPath } from "../../common/enums";
+import { api } from "../../api/axios";
 
 const RegisterPage = () => {
+    const navigate = useNavigate();
+    const initialValues = { name: '', email: '', password: '', confirmPassword: '' };
+
+    const handleSubmit = async (values: typeof initialValues, { setErrors }: any) => {
+        try {
+            const response = await api.post(apiPath.REGISTER, values);
+            localStorage.setItem("token", response.data.access_token);
+            toast.success("Account created successfully!");
+            navigate(appPath.ROOT);
+        } catch (error: any) {
+            const backendError = error.response?.data;
+
+            if (backendError && backendError.message) {
+                if (Array.isArray(backendError.message)) {
+                   toast.error(backendError.message[0]);
+                } 
+                else if (backendError.message.includes('email')) {
+                    setErrors({ email: backendError.message });
+                } else {
+                    toast.error(backendError.message);
+                }
+            } else {
+                // Fallback for network issues
+                toast.error("Something went wrong. Please try again.");
+            }
+        }
+    }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-10 px-8 rounded-2xl border border-slate-200 shadow-sm">
           
+          <ToastContainer/>
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Create Account</h2>
             <p className="text-slate-500 mt-2">Join us to start managing your events</p>
           </div>
 
           <Formik
-            initialValues={{ name: '', email: '', password: '', confirmPassword: '' }}
+            initialValues={initialValues}
             validationSchema={RegisterSchema}
-            onSubmit={(values) => console.log('Register attempt:', values)}
+            onSubmit={handleSubmit}
           >
             {({ errors, touched }) => (
               <Form className="space-y-5">

@@ -1,25 +1,56 @@
 import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { Mail, Lock, User, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { LoginSchema } from '../../common/schemas';
-import { appPath } from '../../common/enums';
+import { apiPath, appPath } from '../../common/enums';
+import { toast, ToastContainer } from 'react-toastify';
+import { api } from '../../api/axios';
 
 const LoginPage: React.FC = () => {
+    const navigate = useNavigate();
+    const initialValues = { email: '', password: '' }
+
+    const handleSubmit = async (values: typeof initialValues, { setErrors }: any) => {
+        try {
+            const response = await api.post(apiPath.LOGIN, values);
+            localStorage.setItem("token", response.data.access_token);
+            toast.success("Account created successfully!");
+            navigate(appPath.ROOT);
+        } catch (error: any) {
+            const backendError = error.response?.data;
+
+            if (backendError && backendError.message) {
+                if (Array.isArray(backendError.message)) {
+                   toast.error(backendError.message[0]);
+                } 
+                else if (backendError.message.includes('email')) {
+                    setErrors({ email: backendError.message });
+                } else {
+                    toast.error(backendError.message);
+                }
+            } else {
+                // Fallback for network issues
+                toast.error("Something went wrong. Please try again.");
+            }
+        }
+    }
+
   return (
     <div className="bg-slate-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-10 px-8 rounded-2xl border border-slate-200 shadow-sm">
           
+          <ToastContainer/>
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Welcome Back</h2>
             <p className="text-slate-500 mt-2">Enter your details to access your events</p>
           </div>
 
           <Formik
-            initialValues={{ name: '', email: '', password: '' }}
+            initialValues={initialValues}
             validationSchema={LoginSchema}
-            onSubmit={(values) => console.log('Login attempt:', values)}
+            onSubmit={handleSubmit}
           >
             {({ errors, touched }) => (
               <Form className="space-y-5">
