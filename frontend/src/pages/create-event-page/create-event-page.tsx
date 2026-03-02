@@ -2,18 +2,7 @@ import React from 'react';
 import { ArrowLeft, Calendar, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from "yup";
-
-// --- Validation Schema ---
-const CreateEventSchema = Yup.object().shape({
-  title: Yup.string().min(5, 'Title too short').required('Event title is required'),
-  description: Yup.string().min(20, 'Please provide more detail').required('Description is required'),
-  date: Yup.string().required('Date is required'),
-  time: Yup.string().required('Time is required'),
-  location: Yup.string().required('Location is required'),
-  capacity: Yup.number().typeError('Must be a number').positive().integer().max(10000),
-  visibility: Yup.string().oneOf(['public', 'private']).required(),
-});
+import { CreateEventSchema } from '../../common/schemas';
 
 const CreateEventPage: React.FC = () => {
   const navigate = useNavigate();
@@ -30,7 +19,6 @@ const CreateEventPage: React.FC = () => {
 
   const handleSubmit = (values: typeof initialValues) => {
     console.log('Form Data:', values);
-    // Add your API call here
   };
 
   return (
