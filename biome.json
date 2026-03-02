@@ -19,7 +19,7 @@
 					"options": {
 						"strictCase": false,
 						"requireAscii": true,
-						"filenameCases": ["camelCase"]
+						"filenameCases": ["kebab-case"]
 					}
 				}
 			}

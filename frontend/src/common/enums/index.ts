@@ -1,1 +1,1 @@
-export { appPath } from "./appPath";
+export { appPath } from "./app-path";

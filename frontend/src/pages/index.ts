@@ -1,3 +1,3 @@
-export { CreateEventPage } from "./CreateEvent/CreateEvent";
-export { HomePage } from "./HomePage/HomePage";
-export { MyEventsPage } from "./MyEvents/MyEvents";
+export { CreateEventPage } from "./create-event-page/create-event-page";
+export { HomePage } from "./home-page/home-page";
+export { MyEventsPage } from "./my-events/my-events";
