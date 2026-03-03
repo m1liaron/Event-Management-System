@@ -1,15 +1,13 @@
 import React from "react";
 import {
-	Calendar,
-	Clock,
-	MapPin,
-	Users,
 	Search,
 } from "lucide-react";
 import { useFetchData } from "../../hooks";
 import { EventCardSkeleton } from "./components/event-card-skeleton/event-card-skeleton";
 import type { Event } from "../../common/types";
+import { EventsList } from "./components/event-list/event-list";
 import { api } from "../../api/axios";
+import { v4 as uuidv4 } from 'uuid';
 
 const HomePage: React.FC = () => {
 	const { isLoading, data: events, setData } = useFetchData<Event[]>("/events");
@@ -25,19 +23,15 @@ const HomePage: React.FC = () => {
             );
         });
 	}
-	
-	const handleJoinEvent = async (eventId: string) => {
-		const { data: { participantsCount }} = await api.post(`/events/${eventId}/join`);
-		updateEvent(eventId, 'isJoined', true)
-		updateEvent(eventId, 'participantsCount', participantsCount)
+
+	const handleRemoveEvent = async (eventId: string) => {
+		await api.delete(`/events/${eventId}`);
+			setData(prev => {
+				if (!prev) return prev;
+				return [...prev].filter(event => event.id !== eventId)
+			});
 	}
 
-	const handleLeaveEvent = async (eventId: string) => {
-		const { data: { participantsCount }} = await api.post(`/events/${eventId}/leave`);
-		await api.post(`/events/${eventId}/leave`);
-		updateEvent(eventId, 'isJoined', false)
-		updateEvent(eventId, 'participantsCount', participantsCount)
-	}
 
 	return (
 		<div className="min-h-screen bg-white text-slate-900 font-sans">
@@ -61,69 +55,10 @@ const HomePage: React.FC = () => {
 
 				{isLoading ? (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{[...Array(6)].map((_, i) => <EventCardSkeleton key={i} />)}
+						{[...Array(6)].map((_, i) => <EventCardSkeleton key={uuidv4()} />)}
 					</div>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-						{events?.map((event) => (
-							<div
-								key={event.id}
-								className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition duration-300"
-							>
-								<div>
-									<h3
-										className={`text-xl font-bold mb-3 ${event.isMyEvent ? "text-indigo-600" : "text-slate-800"}`}
-									>
-										{event.title}
-									</h3>
-									<p className="text-slate-500 text-sm leading-relaxed mb-6">
-										{event.description}
-									</p>
-
-									<div className="space-y-3 mb-8">
-										<div className="flex items-center text-slate-400 text-sm">
-											<Calendar size={16} className="mr-3" />
-											<span>{event.date}</span>
-										</div>
-										<div className="flex items-center text-slate-400 text-sm">
-											<Clock size={16} className="mr-3" />
-											<span>{new Date(event.date).getHours()}:{new Date(event.date).getMinutes()}</span>
-										</div>
-										<div className="flex items-center text-slate-400 text-sm">
-											<MapPin size={16} className="mr-3" />
-											<span>{event.location}</span>
-										</div>
-										<div className="flex items-center text-slate-400 text-sm">
-											<Users size={16} className="mr-3" />
-											<span>{event.participantsCount || 0} / {event.capacity} participants</span>
-										</div>
-									</div>
-								</div>
-								{event.isJoined ? (
-									<button
-										type="button"
-										onClick={() => handleLeaveEvent(event.id)}
-										className="cursor-pointer w-full py-3 rounded-xl bg-red-400 hover:bg-red-700 font-semibold transition"
-									>
-										<span className="font-medium">Leave Event</span>
-									</button>
-								) : (
-									<button
-										type="button"
-										onClick={() => handleJoinEvent(event.id)}
-										disabled={event.isJoined}
-										className={`cursor-pointer w-full py-3 rounded-xl font-semibold transition
-											${event.isJoined
-												? "bg-gray-400 cursor-not-allowed"
-												: "bg-emerald-600 hover:bg-emerald-700"}
-										`}
-									>
-										Join Event
-									</button>	
-								)}
-							</div>
-						))}
-					</div>
+					<EventsList events={events} updateEvent={updateEvent} removeEvent={handleRemoveEvent} />
 				)}
 			</main>
 		</div>

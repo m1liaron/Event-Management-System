@@ -3,6 +3,8 @@ import { ArrowLeft, Calendar, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { CreateEventSchema } from '../../common/schemas';
+import { api } from '../../api/axios';
+import { toast } from 'react-toastify';
 
 const CreateEventPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,7 +19,16 @@ const CreateEventPage: React.FC = () => {
     visibility: 'public',
   };
 
-  const handleSubmit = (values: typeof initialValues) => {
+  const handleSubmit = async (values: typeof initialValues, { resetForm }: { resetForm: () => void }) => {
+    try {
+      await api.post("/events", values);
+      toast.success("Event successfully created");
+      resetForm();
+    } catch (error) {
+      if(error instanceof Error) {
+        toast.error(error.message);
+      }
+    }
     console.log('Form Data:', values);
   };
 
@@ -95,7 +106,6 @@ const CreateEventPage: React.FC = () => {
                       className={`w-full px-4 py-3 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/20 
                         ${errors.date && touched.date ? 'border-red-500' : 'border-slate-200 focus:border-indigo-500'}`}
                     />
-                    <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   </div>
                   <ErrorMessage name="date" component="div" className="text-red-500 text-xs mt-1 font-medium" />
                 </div>
@@ -114,7 +124,6 @@ const CreateEventPage: React.FC = () => {
                       className={`w-full px-4 py-3 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/20 
                         ${errors.time && touched.time ? 'border-red-500' : 'border-slate-200 focus:border-indigo-500'}`}
                     />
-                    <Clock className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   </div>
                   <ErrorMessage name="time" component="div" className="text-red-500 text-xs mt-1 font-medium" />
                 </div>

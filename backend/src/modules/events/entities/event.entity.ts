@@ -6,7 +6,7 @@ export class Event {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
-    @Column()
+    @Column({ unique: true })
     title!: string;
     
     @Column()
@@ -24,10 +24,12 @@ export class Event {
     @Column()
     visibility!: "public" | "private";
 
-    @ManyToMany('User', 'attendedEvents') // Use string 'User'
+    @ManyToMany(() => User, user => user.attendedEvents)
     @JoinTable({ name: "event_participants" })
     participants!: User[];
 
-    @ManyToOne('User', 'events') // Use string 'User'
+    @ManyToOne(() => User, user => user.events, {
+        onDelete: 'CASCADE'
+    })
     organizer!: User;
 }

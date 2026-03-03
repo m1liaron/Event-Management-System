@@ -42,7 +42,7 @@ const NavigationTab: React.FC = () => {
                         <Link to={appPath.CREATE_EVENT}>
                             <button
                                 type="button"
-                                className="flex items-center space-x-2 bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition"
+                                className="flex cursor-pointer items-center space-x-2 bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition"
                             >
                                 <Plus size={18} />
                                 <span className="font-medium">Create Event</span>

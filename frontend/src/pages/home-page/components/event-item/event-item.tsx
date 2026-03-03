@@ -5,27 +5,64 @@ import {
 	Clock,
 	MapPin,
 	Users,
+	X,
 } from "lucide-react";
+import { api } from "../../../../api/axios";
+import { useUserStore } from "../../../../storage/useAuthStore";
 
-const EventItem: React.FC<Event> = ({
+interface EventItemProps extends Event {
+	updateEvent: (eventId: string, key: string, value: string | boolean) => void;
+	removeEvent: (eventId: string) => void;
+}
+
+const EventItem: React.FC<EventItemProps> = ({
+	id,
 	title,
 	description,
 	date,
 	location,
 	capacity,
 	isMyEvent,
-	number_of_participants
+	participantsCount,
+	isJoined,
+	organizerId,
+	updateEvent,
+	removeEvent
 }) => {
+	const { user } = useUserStore();
+
+	const handleJoinEvent = async (eventId: string) => {
+		const { data: { participantsCount }} = await api.post(`/events/${eventId}/join`);
+		updateEvent(eventId, 'isJoined', true)
+		updateEvent(eventId, 'participantsCount', participantsCount)
+	}
+
+	const handleLeaveEvent = async (eventId: string) => {
+		const { data: { participantsCount }} = await api.post(`/events/${eventId}/leave`);
+		await api.post(`/events/${eventId}/leave`);
+		updateEvent(eventId, 'isJoined', false)
+		updateEvent(eventId, 'participantsCount', participantsCount)
+	}
+
 	return (
 		<div
+			key={id}
 			className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition duration-300"
 		>
-			<div>
-				<h3
+			<div className="wrap-anywhere">
+				<div className="flex align-items-center justify-between">
+					<h3
 					className={`text-xl font-bold mb-3 ${isMyEvent ? "text-indigo-600" : "text-slate-800"}`}
-				>
-					{title}
-				</h3>
+					>
+						{title}
+					</h3>
+					{user?.id === organizerId && (
+						<button className="cursor-pointer" type="button" onClick={() => removeEvent(id)}>
+							<X/>
+						</button>
+					)}
+				</div>
+
 				<p className="text-slate-500 text-sm leading-relaxed mb-6">
 					{description}
 				</p>
@@ -37,25 +74,40 @@ const EventItem: React.FC<Event> = ({
 					</div>
 					<div className="flex items-center text-slate-400 text-sm">
 						<Clock size={16} className="mr-3" />
-						<span>{date}</span>
+						<span>{new Date(date).getHours()}:{new Date(date).getMinutes()}</span>
 					</div>
 					<div className="flex items-center text-slate-400 text-sm">
 						<MapPin size={16} className="mr-3" />
-						<span>{ location}</span>
+						<span>{location}</span>
 					</div>
 					<div className="flex items-center text-slate-400 text-sm">
 						<Users size={16} className="mr-3" />
-						<span>{number_of_participants} / {capacity} participants</span>
+						<span>{participantsCount || 0} / {capacity} participants</span>
 					</div>
 				</div>
 			</div>
-
-			<button
-				type="button"
-				className="w-full bg-emerald-600 text-white py-3 rounded-xl font-semibold hover:bg-emerald-700 transition shadow-lg shadow-emerald-100"
-			>
-				Join Event
-			</button>
+			{isJoined ? (
+				<button
+					type="button"
+					onClick={() => handleLeaveEvent(id)}
+					className="cursor-pointer w-full py-3 rounded-xl bg-red-400 hover:bg-red-700 font-semibold transition"
+				>
+					<span className="font-medium">Leave Event</span>
+				</button>
+			) : (
+				<button
+					type="button"
+					onClick={() => handleJoinEvent(id)}
+					disabled={isJoined}
+					className={`cursor-pointer w-full py-3 rounded-xl font-semibold transition
+						${isJoined
+							? "bg-gray-400 cursor-not-allowed"
+							: "bg-emerald-600 hover:bg-emerald-700"}
+					`}
+				>
+					Join Event
+				</button>	
+			)}
 		</div>
 	)
 };

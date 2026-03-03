@@ -4,6 +4,7 @@ import { Repository } from "typeorm";
 import { CreateEventDto } from "./dto/create-event.dto";
 import { UpdateEventDto } from "./dto/update-event.dto";
 import { Event } from "./entities/event.entity";
+import { User } from "../users/entities/user.entity";
 
 @Injectable()
 export class EventsService {
@@ -12,8 +13,12 @@ export class EventsService {
 		private readonly eventRepo: Repository<Event>,
 	) {}
 
-	async create(createEventDto: CreateEventDto) {
-		return await this.eventRepo.save(createEventDto);
+	async create(createEventDto: CreateEventDto, userId: string) {
+		const eventData = {
+			...createEventDto,
+			organizer: { id: userId }
+		}
+		return await this.eventRepo.save(eventData);
 	}
 
 	async findAll(userId?: string) {
@@ -63,7 +68,7 @@ export class EventsService {
 		const isAlreadyJoined = event.participants.some(user => user.id === userId);
 
 		if (!isAlreadyJoined) {
-			event.participants.push({ id: userId } as any);
+			event.participants.push({ id: userId } as User);
 			await this.eventRepo.save(event);
 		}
 

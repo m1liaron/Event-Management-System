@@ -9,6 +9,7 @@ type Event = {
 	isMyEvent: boolean;
 	participantsCount: number;
 	isJoined: boolean;
+	organizerId: string
 };
 
 export type { Event };
