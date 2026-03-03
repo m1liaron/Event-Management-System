@@ -5,35 +5,42 @@ import { Link, useNavigate } from "react-router";
 import { toast, ToastContainer } from "react-toastify";
 import { apiPath, appPath } from "../../common/enums";
 import { api } from "../../api/axios";
+import { useUserStore } from "../../storage/useAuthStore";
 
 const RegisterPage = () => {
-    const navigate = useNavigate();
-    const initialValues = { name: '', email: '', password: '', confirmPassword: '' };
+  const navigate = useNavigate();
+  const { setUser } = useUserStore();
+  const initialValues = { name: '', email: '', password: '', confirmPassword: '' };
 
-    const handleSubmit = async (values: typeof initialValues, { setErrors }: any) => {
-        try {
-            const response = await api.post(apiPath.REGISTER, values);
-            localStorage.setItem("token", response.data.access_token);
-            toast.success("Account created successfully!");
-            navigate(appPath.ROOT);
-        } catch (error: any) {
-            const backendError = error.response?.data;
+  const handleSubmit = async (values: typeof initialValues, { setErrors }: any) => {
+      try {
+          const response = await api.post(apiPath.REGISTER, values);
+          const { access_token, user } = response.data;
+          setUser({
+            ...user,
+            token: access_token
+          });
+          
+          toast.success("Account created successfully!");
+          navigate(appPath.ROOT);
+      } catch (error: any) {
+          const backendError = error.response?.data;
 
-            if (backendError && backendError.message) {
-                if (Array.isArray(backendError.message)) {
-                   toast.error(backendError.message[0]);
-                } 
-                else if (backendError.message.includes('email')) {
-                    setErrors({ email: backendError.message });
-                } else {
-                    toast.error(backendError.message);
-                }
-            } else {
-                // Fallback for network issues
-                toast.error("Something went wrong. Please try again.");
-            }
-        }
-    }
+          if (backendError && backendError.message) {
+              if (Array.isArray(backendError.message)) {
+                toast.error(backendError.message[0]);
+              } 
+              else if (backendError.message.includes('email')) {
+                  setErrors({ email: backendError.message });
+              } else {
+                  toast.error(backendError.message);
+              }
+          } else {
+              // Fallback for network issues
+              toast.error("Something went wrong. Please try again.");
+          }
+      }
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">

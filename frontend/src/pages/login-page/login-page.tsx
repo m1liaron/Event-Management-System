@@ -6,15 +6,21 @@ import { LoginSchema } from '../../common/schemas';
 import { apiPath, appPath } from '../../common/enums';
 import { toast, ToastContainer } from 'react-toastify';
 import { api } from '../../api/axios';
+import { useUserStore } from '../../storage/useAuthStore';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
+    const { setUser } = useUserStore();
     const initialValues = { email: '', password: '' }
 
     const handleSubmit = async (values: typeof initialValues, { setErrors }: any) => {
         try {
             const response = await api.post(apiPath.LOGIN, values);
-            localStorage.setItem("token", response.data.access_token);
+            const { access_token, user } = response.data;
+            setUser({
+              ...user,
+              token: access_token
+            });
             toast.success("Account created successfully!");
             navigate(appPath.ROOT);
         } catch (error: any) {
