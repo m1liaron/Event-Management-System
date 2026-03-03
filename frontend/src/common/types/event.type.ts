@@ -1,3 +1,9 @@
+import type { User } from "./user.type";
+
+type Organizer = {
+	id: string;
+}
+
 type Event = {
 	id: string;
 	title: string;
@@ -8,8 +14,9 @@ type Event = {
 	visibility: "Public" | "Private";
 	isMyEvent: boolean;
 	participantsCount: number;
+	participants?: User[];
 	isJoined: boolean;
-	organizerId: string
+	organizer: Organizer
 };
 
 export type { Event };

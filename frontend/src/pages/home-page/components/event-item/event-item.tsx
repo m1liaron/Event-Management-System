@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { api } from "../../../../api/axios";
 import { useUserStore } from "../../../../storage/useAuthStore";
+import { Link } from "react-router";
+import { appPath } from "../../../../common/enums";
 
 interface EventItemProps extends Event {
 	updateEvent: (eventId: string, key: string, value: string | boolean) => void;
@@ -45,7 +47,8 @@ const EventItem: React.FC<EventItemProps> = ({
 	}
 
 	return (
-		<div
+		<Link
+			to={appPath.EVENT_DETAILS.replace(":eventId", id)}
 			key={id}
 			className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition duration-300"
 		>
@@ -109,7 +112,7 @@ const EventItem: React.FC<EventItemProps> = ({
 						Join Event
 					</button>	 
 			}
-		</div>
+		</Link>
 	)
 };
 

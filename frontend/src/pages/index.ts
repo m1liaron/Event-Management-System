@@ -3,3 +3,4 @@ export { HomePage } from "./home-page/home-page";
 export { MyEventsPage } from "./my-events/my-events";
 export { LoginPage } from "./login-page/login-page";
 export { RegisterPage } from "./register-page/register-page";
+export { EventDetailsPage } from "./event-details-page/event-details-page";

@@ -45,7 +45,8 @@ export class EventsService {
 
 	async findOne(id: string) {
 		return await this.eventRepo.find({ 
-			where: { id }
+			where: { id },
+			relations: ['participants', 'organizer']
 		})
 	}
 
