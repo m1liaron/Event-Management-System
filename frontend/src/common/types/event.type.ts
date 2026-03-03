@@ -7,7 +7,8 @@ type Event = {
 	capacity: number | null;
 	visibility: "Public" | "Private";
 	isMyEvent: boolean;
-	number_of_participants: number;
+	participantsCount: number;
+	isJoined: boolean;
 };
 
 export type { Event };

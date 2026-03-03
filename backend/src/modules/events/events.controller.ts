@@ -13,6 +13,7 @@ import { CreateEventDto } from "./dto/create-event.dto";
 import { UpdateEventDto } from "./dto/update-event.dto";
 import { EventsService } from "./events.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { OptionalJwtAuthGuard } from "../auth/guards/optional-jwt-auth.guard";
 
 @Controller("events")
 export class EventsController {
@@ -24,9 +25,10 @@ export class EventsController {
 		return this.eventsService.create(createEventDto);
 	}
 
+	@UseGuards(OptionalJwtAuthGuard)
 	@Get()
-	findAll() {
-		return this.eventsService.findAll();
+	findAll(@Request() req) {
+		return this.eventsService.findAll(req.user.id);
 	}
 
 	@UseGuards(JwtAuthGuard)

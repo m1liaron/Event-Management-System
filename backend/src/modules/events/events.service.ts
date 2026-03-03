@@ -16,8 +16,26 @@ export class EventsService {
 		return await this.eventRepo.save(createEventDto);
 	}
 
-	async findAll() {
-		return await this.eventRepo.find();
+	async findAll(userId?: string) {
+		const events = await this.eventRepo.find({
+			relations: ["participants", "organizer"]
+		});
+
+		return events.map((event) => {
+			const isJoined = userId
+				? event.participants.some((user) => user.id === userId)
+				: false;
+
+			const participantsCount = event.participants.length;
+
+			const { participants, ...eventData } = event;
+
+			return {
+				...eventData,
+				participantsCount,
+				isJoined,
+			};
+		})
 	}
 
 	async findOne(id: string) {
@@ -66,7 +84,7 @@ export class EventsService {
 
 		if (!event) throw new NotFoundException("Event not found");
 
-		event.participants.filter(user => user.id !== userId);
+		event.participants = event.participants.filter(user => user.id !== userId);
 
 		await this.eventRepo.save(event);
 		
@@ -74,7 +92,7 @@ export class EventsService {
 
 		return {
 			...evenData,
-			participantsCount: participants.length - 1,
+			participantsCount: participants.length,
 			isJoined: false
 		};
 	}
