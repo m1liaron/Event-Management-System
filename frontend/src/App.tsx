@@ -2,10 +2,23 @@ import { Route, Routes } from "react-router";
 import { appPath } from "./common/enums";
 import { CreateEventPage, HomePage, LoginPage, MyEventsPage, RegisterPage } from "./pages";
 import { NavigationTab } from "./common/components/navigation-tab/navigation-tab";
+import { useEffect } from "react";
+import { api } from "./api/axios";
+import { ToastContainer } from "react-toastify";
 
 function App() {
+
+	useEffect(() => {
+		const getUser = async () => {
+			await api.get("/users/me");
+		}
+
+		getUser();
+	}, []);
+
 	return (
 		<>
+		    <ToastContainer/>
 			<NavigationTab/>
 			<Routes>
 				<Route path={appPath.ROOT} element={<HomePage />} />

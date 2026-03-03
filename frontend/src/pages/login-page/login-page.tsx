@@ -47,7 +47,6 @@ const LoginPage: React.FC = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-10 px-8 rounded-2xl border border-slate-200 shadow-sm">
           
-          <ToastContainer/>
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Welcome Back</h2>
             <p className="text-slate-500 mt-2">Enter your details to access your events</p>

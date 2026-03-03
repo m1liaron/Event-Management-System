@@ -47,7 +47,6 @@ const RegisterPage = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-10 px-8 rounded-2xl border border-slate-200 shadow-sm">
           
-          <ToastContainer/>
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Create Account</h2>
             <p className="text-slate-500 mt-2">Join us to start managing your events</p>
