@@ -6,6 +6,7 @@ import {
 	Param,
 	Patch,
 	Post,
+	Request,
 	UseGuards,
 } from "@nestjs/common";
 import { CreateEventDto } from "./dto/create-event.dto";
@@ -31,30 +32,32 @@ export class EventsController {
 	@UseGuards(JwtAuthGuard)
 	@Get(":id")
 	findOne(@Param("id") id: string) {
-		return this.eventsService.findOne(+id);
+		return this.eventsService.findOne(id);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Patch(":id")
 	update(@Param("id") id: string, @Body() updateEventDto: UpdateEventDto) {
-		return this.eventsService.update(+id, updateEventDto);
+		return this.eventsService.update(id, updateEventDto);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Delete(":id")
 	remove(@Param("id") id: string) {
-		return this.eventsService.remove(+id);
+		return this.eventsService.remove(id);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Post(":id/join")
-	join(@Body() createEventDto: CreateEventDto) {
-		return this.eventsService.create(createEventDto);
+	join(@Param("id") eventId: string, @Request() req) {
+		const userId = req.user.id;
+		return this.eventsService.join(eventId, userId);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Post(":id/leave")
-	leave(@Body() createEventDto: CreateEventDto) {
-		return this.eventsService.create(createEventDto);
+	leave(@Param("id") eventId: string, @Request() req) {
+		const userId = req.user.id;
+		return this.eventsService.leave(eventId, userId);
 	}
 }

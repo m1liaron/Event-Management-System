@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CreateEventDto } from "./dto/create-event.dto";
@@ -12,28 +12,75 @@ export class EventsService {
 		private readonly eventRepo: Repository<Event>,
 	) {}
 
-	create(_createEventDto: CreateEventDto) {
-		return "This action adds a new event";
+	async create(createEventDto: CreateEventDto) {
+		return await this.eventRepo.save(createEventDto);
 	}
 
-	findAll() {
-		return `This action returns all events`;
+	async findAll() {
+		return await this.eventRepo.find();
 	}
 
-	findOne(id: number) {
-		return `This action returns a #${id} event`;
+	async findOne(id: string) {
+		return await this.eventRepo.find({ 
+			where: { id }
+		})
 	}
 
-	update(id: number, _updateEventDto: UpdateEventDto) {
-		return `This action updates a #${id} event`;
+	async update(id: string, updateEventDto: UpdateEventDto) {
+		return await this.eventRepo.update(id, updateEventDto);
 	}
 
-	remove(id: number) {
-		return `This action removes a #${id} event`;
+	async remove(id: string) {
+		return await this.eventRepo.delete(id);
+	}
+
+	async join(eventId: string, userId: string) {
+		const event = await this.eventRepo.findOne({
+			where: { id: eventId },
+			relations: ["participants"]
+		});
+
+		if (!event) throw new NotFoundException("Event not found");
+
+		const isAlreadyJoined = event.participants.some(user => user.id === userId);
+
+		if (!isAlreadyJoined) {
+			event.participants.push({ id: userId } as any);
+			await this.eventRepo.save(event);
+		}
+
+		const { participants, ...evenData } = event;
+
+		return {
+			...evenData,
+			participantsCount: participants.length,
+			isJoined: true
+		};
+	}
+
+	async leave(eventId: string, userId: string) {
+		const event = await this.eventRepo.findOne({
+			where: { id: eventId },
+			relations: ["participants"]
+		});
+
+		if (!event) throw new NotFoundException("Event not found");
+
+		event.participants.filter(user => user.id !== userId);
+
+		await this.eventRepo.save(event);
+		
+		const { participants, ...evenData } = event;
+
+		return {
+			...evenData,
+			participantsCount: participants.length - 1,
+			isJoined: false
+		};
 	}
 
 	async findByOrganizer(organizerId: string) {
-		return this.eventRepo.find({
+		return await this.eventRepo.find({
 			where: { organizer: { id: organizerId }}
 		})
 	}

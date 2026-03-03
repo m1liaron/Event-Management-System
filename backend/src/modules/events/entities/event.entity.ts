@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../../users/entities/user.entity";
 
 @Entity("events")
@@ -24,11 +24,10 @@ export class Event {
     @Column()
     visibility!: "public" | "private";
 
-    // Many events -> one organizer
-    @ManyToOne(() => User, (user) => user.events)
-    organizer!: User;
-
-    // Many events -> many participants
-    @ManyToMany(() => User, (user) => user.attendedEvents)
+    @ManyToMany('User', 'attendedEvents') // Use string 'User'
+    @JoinTable({ name: "event_participants" })
     participants!: User[];
+
+    @ManyToOne('User', 'events') // Use string 'User'
+    organizer!: User;
 }
