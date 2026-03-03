@@ -51,13 +51,13 @@ const WeekView: React.FC<WeekViewProps> = ({ weekDays, currentDate }) => 	{
                             item.events.map((event) => (
                                 <div
                                     key={event.time}
-                                    className="bg-[#eef2ff] p-3 rounded-xl border border-indigo-50"
+                                    className="wrap-anywhere bg-[#eef2ff] p-3 rounded-xl border border-indigo-50"
                                 >
                                     <div className="text-[11px] font-bold text-[#6366f1] leading-tight">
                                         {event.time}
                                     </div>
                                     <div className="text-[11px] font-bold text-[#6366f1] leading-tight">
-                                        {event.title}
+                                        {event.title.length > 10 ? `${event.title.slice(0, 10)}...` : event.title}
                                     </div>
                                 </div>
                             ))

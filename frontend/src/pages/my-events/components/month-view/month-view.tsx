@@ -1,4 +1,5 @@
 import type { Event } from "../../../../common/types";
+import { v4 as uuidv4 } from "uuid";
 
 interface MonthViewProps {
   days: number[];
@@ -23,8 +24,8 @@ const MonthView: React.FC<MonthViewProps> = ({ days, padding, daysInMonth, start
         ))}
       </div>
       <div className="grid grid-cols-7">
-        {padding.map((_, i) => (
-          <div key={`pad-${i}`} className="h-32 border-b border-r border-slate-200 bg-slate-50/30" />
+        {padding.map(() => (
+          <div key={`pad-${uuidv4}`} className="h-32 border-b border-r border-slate-200 bg-slate-50/30" />
         ))}
         {days.map((day) => {
           const dayEvents = eventsByDay[day] || [];
@@ -32,7 +33,6 @@ const MonthView: React.FC<MonthViewProps> = ({ days, padding, daysInMonth, start
             day === today.getDate() && 
             currentDate.getMonth() === today.getMonth() && 
             currentDate.getFullYear() === today.getFullYear();
-          const hasEvent = dayEvents.length > 0;
 
           return (
             <div key={day} className={`h-32 border-b border-r border-slate-200 p-3 hover:bg-slate-50 relative group ${isToday ? 'ring-2 ring-inset ring-[#6366f1] z-10' : ''}`}>
@@ -44,18 +44,18 @@ const MonthView: React.FC<MonthViewProps> = ({ days, padding, daysInMonth, start
                 return (
                   <div
                     key={event.id}
-                    className="mt-2 bg-[#eef2ff] text-[#4f46e5] text-[11px] px-2 py-1.5 rounded-md border border-[#c7d2fe] font-semibold"
+                    className="wrap-anywhere mt-2 bg-[#eef2ff] text-[#4f46e5] text-[11px] px-2 py-1.5 rounded-md border border-[#c7d2fe] font-semibold"
                   >
                     <span className="opacity-70">{time} - </span>
-                    <span className="truncate">{event.title}</span>
+                    <span className="truncate">{event.title.length > 20 ? `${event.title.slice(0, 20)}...` : event.title}</span>
                   </div>
                 );
               })}
             </div>
           );
         })}
-        {Array.from({ length: (7 - ((daysInMonth + startDayPadding) % 7)) % 7 }).map((_, i) => (
-          <div key={`end-pad-${i}`} className="h-32 border-b border-r border-slate-200 bg-slate-50/30" />
+        {Array.from({ length: (7 - ((daysInMonth + startDayPadding) % 7)) % 7 }).map(() => (
+          <div key={`end-pad-${uuidv4()}`} className="h-32 border-b border-r border-slate-200 bg-slate-50/30" />
         ))}
       </div>
     </div>

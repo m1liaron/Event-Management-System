@@ -21,7 +21,7 @@ const EventItem: React.FC<EventItemProps> = ({
 	description,
 	date,
 	location,
-	capacity,
+	capacity = 0,
 	isMyEvent,
 	participantsCount,
 	isJoined,
@@ -54,7 +54,7 @@ const EventItem: React.FC<EventItemProps> = ({
 					<h3
 					className={`text-xl font-bold mb-3 ${isMyEvent ? "text-indigo-600" : "text-slate-800"}`}
 					>
-						{title}
+						{title.length > 40 ? `${title.slice(0, 40)}...` : title}
 					</h3>
 					{user?.id === organizerId && (
 						<button className="cursor-pointer" type="button" onClick={() => removeEvent(id)}>
@@ -64,7 +64,7 @@ const EventItem: React.FC<EventItemProps> = ({
 				</div>
 
 				<p className="text-slate-500 text-sm leading-relaxed mb-6">
-					{description}
+					{description.length > 100 ? `${description.slice(0, 100)}...` : description}
 				</p>
 
 				<div className="space-y-3 mb-8">
@@ -94,20 +94,21 @@ const EventItem: React.FC<EventItemProps> = ({
 				>
 					<span className="font-medium">Leave Event</span>
 				</button>
-			) : (
-				<button
-					type="button"
-					onClick={() => handleJoinEvent(id)}
-					disabled={isJoined}
-					className={`cursor-pointer w-full py-3 rounded-xl font-semibold transition
-						${isJoined
-							? "bg-gray-400 cursor-not-allowed"
-							: "bg-emerald-600 hover:bg-emerald-700"}
-					`}
-				>
-					Join Event
-				</button>	
-			)}
+			) : participantsCount === capacity ? 
+				 <span>Event is full</span> 
+				: <button
+						type="button"
+						onClick={() => handleJoinEvent(id)}
+						disabled={isJoined}
+						className={`cursor-pointer w-full py-3 rounded-xl font-semibold transition
+							${isJoined
+								? "bg-gray-400 cursor-not-allowed"
+								: "bg-emerald-600 hover:bg-emerald-700"}
+						`}
+					>
+						Join Event
+					</button>	 
+			}
 		</div>
 	)
 };

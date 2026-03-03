@@ -4,7 +4,7 @@ type Event = {
 	description: string;
 	date: string;
 	location: string;
-	capacity: number | null;
+	capacity: number | 1;
 	visibility: "Public" | "Private";
 	isMyEvent: boolean;
 	participantsCount: number;

@@ -118,11 +118,11 @@ const MyEventsPage: React.FC = () => {
             <ChevronLeft size={18} />
           </button>
           <h2 className="text-2xl font-bold px-4 min-w-[200px] text-center">{monthName} {year}</h2>
-          <button type='button' onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-1.5 hover:bg-slate-50 rounded-md border border-slate-200 cursor-pointer">
+          <button type='button' onClick={handleNext} className="p-1.5 hover:bg-slate-50 rounded-md border border-slate-200 cursor-pointer">
             <ChevronRight size={18} />
           </button>
           {currentDate.getMonth() !== today.getMonth() && (
-            <button type='button' onClick={handleNext} className="ml-2 px-3 py-1 hover:bg-slate-50 rounded-md border border-slate-200 text-sm font-medium cursor-pointer">
+            <button type='button' onClick={() => setCurrentDate(new Date())} className="ml-2 px-3 py-1 hover:bg-slate-50 rounded-md border border-slate-200 text-sm font-medium cursor-pointer">
               Today
             </button>
           )}
