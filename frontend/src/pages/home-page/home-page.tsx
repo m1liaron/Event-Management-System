@@ -2,7 +2,7 @@ import React from "react";
 import {
 	Search,
 } from "lucide-react";
-import { useFetchData } from "../../hooks";
+import { useEventActions, useFetchData } from "../../hooks";
 import { EventCardSkeleton } from "./components/event-card-skeleton/event-card-skeleton";
 import type { Event } from "../../common/types";
 import { EventsList } from "./components/event-list/event-list";
@@ -11,27 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const HomePage: React.FC = () => {
 	const { isLoading, data: events, setData } = useFetchData<Event[]>("/events");
-
-	const updateEvent = (eventId: string, key: string, value: string | boolean) => {
-		setData(prev => {
-            if (!prev) return prev;
-
-            return prev.map(event =>
-                event.id === eventId
-                    ? { ...event, [key]: value }
-                    : event
-            );
-        });
-	}
-
-	const handleRemoveEvent = async (eventId: string) => {
-		await api.delete(`/events/${eventId}`);
-			setData(prev => {
-				if (!prev) return prev;
-				return [...prev].filter(event => event.id !== eventId)
-			});
-	}
-
+	const { handleRemove, handleJoin, handleLeave } = useEventActions(setData);
 
 	return (
 		<div className="min-h-screen bg-white text-slate-900 font-sans">
@@ -58,7 +38,7 @@ const HomePage: React.FC = () => {
 						{[...Array(6)].map((_, i) => <EventCardSkeleton key={uuidv4()} />)}
 					</div>
 				) : (
-					<EventsList events={events} updateEvent={updateEvent} removeEvent={handleRemoveEvent} />
+					<EventsList events={events} handleLeave={handleLeave} handleJoin={handleJoin} removeEvent={handleRemove} />
 				)}
 			</main>
 		</div>

@@ -1,32 +1,21 @@
 
-import React, { useEffect, useState } from 'react';
 import { Calendar, Clock, MapPin, Users, Edit, Trash2, ChevronLeft } from 'lucide-react';
-import { Link, NavLink, useParams } from 'react-router';
-import { useFetchData } from '../../hooks';
+import { Link, useParams } from 'react-router';
+import { useEventActions, useFetchData } from '../../hooks';
 import type { Event } from '../../common/types';
 import { useUserStore } from '../../storage/useAuthStore';
 import { appPath } from '../../common/enums';
-import { api } from '../../api/axios';
 
 const EventDetailsPage: React.FC = () => {
   const { eventId } = useParams();
-  const { data } = useFetchData<Event[]>(`/events/${eventId}`);
+  const { data: event, setData } = useFetchData<Event>(`/events/${eventId}`);
+  const { handleJoin, handleLeave, handleRemove } = useEventActions(setData);
   const { user, isAuthenticated } = useUserStore();
-  const [isJoined, setIsJoined] = useState<boolean>(		data[0]?.isJoined || false);
 
-  if (!data) return <div>Event not found</div>;
-
-  const event = data[0];
+  if (!event || !eventId) return <div>Event not found</div>;
+  const isJoined = event.isJoined;
   
   const isOrganizer = user?.id === event?.organizer?.id;
-
-  const handleJoinEvent = async (eventId: string) => {
-		await api.post(`/events/${eventId}/join`);
-	}
-  
-  const handleLeaveEvent = async (eventId: string) => {
-		await api.post(`/events/${eventId}/leave`);
-	}
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -45,7 +34,7 @@ const EventDetailsPage: React.FC = () => {
         {/* Main Content (Left 2 Columns) */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
-            <div className="flex justify-between items-start mb-6">
+            <div className="wrap-anywhere flex justify-between items-start mb-6">
               <h1 className="text-3xl font-bold text-slate-900 leading-tight">
                 {event?.title}
               </h1>
@@ -54,14 +43,14 @@ const EventDetailsPage: React.FC = () => {
                   <button type="button" className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">
                     <Edit size={20} />
                   </button>
-                  <button type="button" className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                  <button onClick={() => handleRemove(eventId)} type="button" className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
                     <Trash2 size={20} />
                   </button>
                 </div>
               )}
             </div>
 
-            <p className="text-slate-600 leading-relaxed mb-8">
+            <p className="wrap-anywhere text-slate-600 leading-relaxed mb-8">
               {event?.description}
             </p>
 
@@ -131,8 +120,8 @@ const EventDetailsPage: React.FC = () => {
             {isAuthenticated && (
               <button
                   type='button'
-                  onClick={isJoined ? handleLeaveEvent : handleJoinEvent}
-                className={`w-full py-4 rounded-2xl font-bold transition shadow-lg ${
+                  onClick={isJoined ? () => handleLeave(eventId) : () => handleJoin(eventId)}
+                className={`cursor-pointer w-full py-4 rounded-2xl font-bold transition shadow-lg ${
                   isJoined 
                   ? "bg-white border-2 border-rose-500 text-rose-500 hover:bg-rose-50 shadow-rose-50" 
                   : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-100"

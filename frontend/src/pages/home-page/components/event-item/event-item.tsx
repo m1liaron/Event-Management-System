@@ -7,13 +7,13 @@ import {
 	Users,
 	X,
 } from "lucide-react";
-import { api } from "../../../../api/axios";
 import { useUserStore } from "../../../../storage/useAuthStore";
 import { Link } from "react-router";
 import { appPath } from "../../../../common/enums";
 
 interface EventItemProps extends Event {
-	updateEvent: (eventId: string, key: string, value: string | boolean) => void;
+	handleJoin: (eventId: string) => void;
+	handleLeave: (eventId: string) => void;
 	removeEvent: (eventId: string) => void;
 }
 
@@ -28,23 +28,11 @@ const EventItem: React.FC<EventItemProps> = ({
 	participantsCount,
 	isJoined,
 	organizer,
-	updateEvent,
+	handleJoin,
+	handleLeave,
 	removeEvent
 }) => {
 	const { user } = useUserStore();
-
-	const handleJoinEvent = async (eventId: string) => {
-		const { data: { participantsCount }} = await api.post(`/events/${eventId}/join`);
-		updateEvent(eventId, 'isJoined', true)
-		updateEvent(eventId, 'participantsCount', participantsCount)
-	}
-
-	const handleLeaveEvent = async (eventId: string) => {
-		const { data: { participantsCount }} = await api.post(`/events/${eventId}/leave`);
-		await api.post(`/events/${eventId}/leave`);
-		updateEvent(eventId, 'isJoined', false)
-		updateEvent(eventId, 'participantsCount', participantsCount)
-	}
 
 
 	return (
@@ -93,7 +81,7 @@ const EventItem: React.FC<EventItemProps> = ({
 			{isJoined ? (
 				<button
 					type="button"
-					onClick={() => handleLeaveEvent(id)}
+					onClick={() => handleLeave(id)}
 					className="cursor-pointer w-full py-3 rounded-xl bg-red-400 hover:bg-red-700 font-semibold transition"
 				>
 					<span className="font-medium">Leave Event</span>
@@ -102,7 +90,7 @@ const EventItem: React.FC<EventItemProps> = ({
 				 <span>Event is full</span> 
 				: <button
 						type="button"
-						onClick={() => handleJoinEvent(id)}
+						onClick={() => handleJoin(id)}
 						disabled={isJoined}
 						className={`cursor-pointer w-full py-3 rounded-xl font-semibold transition
 							${isJoined
