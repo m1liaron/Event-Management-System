@@ -114,24 +114,7 @@ const EventDetailsPage: React.FC = () => {
               )}
               {isOrganizer && (
                 <div className="flex gap-2">
-                  {isEditing ? (
-                      <div className='row gap-1'>
-                        <button
-                          onClick={handleUpdate}
-                          type='button'
-                          className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-100 transition-all flex items-center gap-2"
-                        >
-                          Save
-                        </button>
-                        <button
-                          type='button'
-                          onClick={handleCancel}
-                          className="bg-white border-2 border-slate-200 text-slate-500 px-5 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition-all"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
+                  {!isEditing && (
                       <>
                         <button
                           type='button'
@@ -196,12 +179,11 @@ const EventDetailsPage: React.FC = () => {
                       name="date"
                       value={formData.date.slice(0, 16)}
                       onChange={handleChange}
-                      className={`border rounded-lg p-2`}
+                      className={`border rounded-lg p-2 ${inputClass}`}
                     />
                   ) : (
                     <p>{new Date(event.date).toLocaleString()}</p>
                   )}
-                  <p className="font-semibold">{new Date(event?.date).getHours()} {new Date(event?.date).getMinutes()}</p>
                 </div>
               </div>
               <div className="flex items-center text-slate-600">
@@ -215,7 +197,7 @@ const EventDetailsPage: React.FC = () => {
                       name="location"
                       value={formData.location}
                       onChange={handleChange}
-                      className={`border rounded-lg p-2`}
+                      className={`border rounded-lg p-2 ${inputClass}`}
                     />
                   ) : (
                     <p>{event.location}</p>
@@ -234,13 +216,32 @@ const EventDetailsPage: React.FC = () => {
                       name="capacity"
                       value={formData.capacity}
                       onChange={handleChange}
-                      className={`border rounded-lg p-2`}
+                      className={`border rounded-lg p-2 ${inputClass}`}
                     />
                   ) : (
                     <p className="font-semibold">{event?.participantsCount || 0} / {event?.capacity}</p>
                   )}
                 </div>
               </div>
+
+              {(isOrganizer && isEditing) && (
+                      <div className='flex justify-content-between gap-1'>
+                        <button
+                          onClick={handleUpdate}
+                          type='button'
+                          className="cursor-pointer bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-100 transition-all flex items-center gap-2"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type='button'
+                          onClick={handleCancel}
+                          className="cursor-pointer bg-white border-2 border-slate-200 text-slate-500 px-5 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+              )}
             </div>
           </div>
 

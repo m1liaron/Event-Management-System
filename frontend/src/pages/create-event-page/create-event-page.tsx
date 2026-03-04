@@ -5,6 +5,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { CreateEventSchema } from '../../common/schemas';
 import { api } from '../../api/axios';
 import { toast } from 'react-toastify';
+import { appPath } from '../../common/enums';
 
 const CreateEventPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,9 +22,10 @@ const CreateEventPage: React.FC = () => {
 
   const handleSubmit = async (values: typeof initialValues, { resetForm }: { resetForm: () => void }) => {
     try {
-      await api.post("/events", values);
+      const { data} = await api.post("/events", values);
       toast.success("Event successfully created");
       resetForm();
+      navigate(appPath.EVENT_DETAILS.replace(":eventId", data.id));
     } catch (error) {
       if(error instanceof Error) {
         toast.error(error.message);
