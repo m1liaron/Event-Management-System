@@ -27,7 +27,7 @@ const EventItem: React.FC<EventItemProps> = ({
 	isMyEvent,
 	participantsCount,
 	isJoined,
-	organizerId,
+	organizer,
 	updateEvent,
 	removeEvent
 }) => {
@@ -46,6 +46,7 @@ const EventItem: React.FC<EventItemProps> = ({
 		updateEvent(eventId, 'participantsCount', participantsCount)
 	}
 
+
 	return (
 		<Link
 			to={appPath.EVENT_DETAILS.replace(":eventId", id)}
@@ -59,7 +60,7 @@ const EventItem: React.FC<EventItemProps> = ({
 					>
 						{title.length > 40 ? `${title.slice(0, 40)}...` : title}
 					</h3>
-					{user?.id === organizerId && (
+					{user?.id === organizer?.id && (
 						<button className="cursor-pointer" type="button" onClick={() => removeEvent(id)}>
 							<X/>
 						</button>

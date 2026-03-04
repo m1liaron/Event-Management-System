@@ -1,9 +1,5 @@
 import type { User } from "./user.type";
 
-type Organizer = {
-	id: string;
-}
-
 type Event = {
 	id: string;
 	title: string;
@@ -16,7 +12,7 @@ type Event = {
 	participantsCount: number;
 	participants?: User[];
 	isJoined: boolean;
-	organizer: Organizer
+	organizer: User
 };
 
 export type { Event };
