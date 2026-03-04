@@ -31,16 +31,16 @@ export class EventsController {
 		return this.eventsService.findAll(req.user.id);
 	}
 
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(OptionalJwtAuthGuard)
 	@Get(":id")
-	findOne(@Param("id") id: string) {
-		return this.eventsService.findOne(id);
+	findOne(@Request() req, @Param("id") id: string) {
+		return this.eventsService.findOne(id, req.user.id);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Patch(":id")
-	update(@Param("id") id: string, @Body() updateEventDto: UpdateEventDto) {
-		return this.eventsService.update(id, updateEventDto);
+	update(@Request() req, @Param("id") id: string, @Body() updateEventDto: UpdateEventDto) {
+		return this.eventsService.update(id, req.user.id, updateEventDto);
 	}
 
 	@UseGuards(JwtAuthGuard)

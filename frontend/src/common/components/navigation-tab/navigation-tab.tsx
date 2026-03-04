@@ -20,6 +20,7 @@ const NavigationTab: React.FC = () => {
             const isLogout = confirm("Are you sure you want to log out?");
             if(isLogout) {
                 logout();
+                navigate(appPath.ROOT)
             }
         } else {
             navigate(appPath.LOGIN);

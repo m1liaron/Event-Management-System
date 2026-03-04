@@ -17,13 +17,14 @@ export class UsersService {
 	async findByEmail(email: string) {
 		return this.userRepo.findOne({
 			where: { email },
+			select: ["id", "email", "name"],
 		});
 	}
 
 	async findByEmailWithPassword(email: string) {
 		return this.userRepo.findOne({
 			where: { email: email.trim() },
-			select: ["email", "password", "name"],
+			select: ["id", "email", "password", "name"],
 		});
 	}
 

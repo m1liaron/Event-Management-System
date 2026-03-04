@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CreateEventDto } from "./dto/create-event.dto";
@@ -43,15 +43,44 @@ export class EventsService {
 		})
 	}
 
-	async findOne(id: string) {
-		return await this.eventRepo.findOne({ 
+	async findOne(id: string, userId?: string) {
+		const event = await this.eventRepo.findOne({ 
 			where: { id },
 			relations: ['participants', 'organizer']
-		})
+		});
+
+		if(event) {
+			const isJoined = userId
+				? event.participants.some((user) => user.id === userId)
+				: false;
+
+			const participantsCount = event.participants.length;
+			return {
+				...event,
+				isJoined,
+				participantsCount
+			};
+		}
 	}
 
-	async update(id: string, updateEventDto: UpdateEventDto) {
-		return await this.eventRepo.update(id, updateEventDto);
+	async update(id: string, userId: string, updateEventDto: UpdateEventDto) {
+		const event = await this.eventRepo.findOne({
+			where: { id },
+			relations: ['organizer']
+		});
+		if (!event) {
+			throw new NotFoundException("Event not found");
+		}
+
+		if(event?.organizer.id !== userId ) {
+			throw new ForbiddenException("Only organizer can update");
+		}
+
+		Object.assign(event, updateEventDto);
+
+		const updatedEvent = await this.eventRepo.save(event);
+
+		return updatedEvent;
 	}
 
 	async remove(id: string) {
@@ -61,7 +90,7 @@ export class EventsService {
 	async join(eventId: string, userId: string) {
 		const event = await this.eventRepo.findOne({
 			where: { id: eventId },
-			relations: ["participants"]
+			relations: ['participants']
 		});
 
 		if (!event) throw new NotFoundException("Event not found");
@@ -73,19 +102,13 @@ export class EventsService {
 			await this.eventRepo.save(event);
 		}
 
-		const { participants, ...evenData } = event;
-
-		return {
-			...evenData,
-			participantsCount: participants.length,
-			isJoined: true
-		};
+		return this.findOne(eventId, userId);
 	}
 
 	async leave(eventId: string, userId: string) {
 		const event = await this.eventRepo.findOne({
 			where: { id: eventId },
-			relations: ["participants"]
+			relations: ['participants']
 		});
 
 		if (!event) throw new NotFoundException("Event not found");
@@ -94,13 +117,7 @@ export class EventsService {
 
 		await this.eventRepo.save(event);
 		
-		const { participants, ...evenData } = event;
-
-		return {
-			...evenData,
-			participantsCount: participants.length,
-			isJoined: false
-		};
+		return this.findOne(eventId, userId);
 	}
 
 	async findByOrganizer(organizerId: string) {

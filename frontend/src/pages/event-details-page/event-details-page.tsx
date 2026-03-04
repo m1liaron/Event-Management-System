@@ -5,6 +5,9 @@ import { useEventActions, useFetchData } from '../../hooks';
 import type { Event } from '../../common/types';
 import { useUserStore } from '../../storage/useAuthStore';
 import { appPath } from '../../common/enums';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import { api } from '../../api/axios';
 
 const EventDetailsPage: React.FC = () => {
   const { eventId } = useParams();
@@ -12,10 +15,72 @@ const EventDetailsPage: React.FC = () => {
   const { handleJoin, handleLeave, handleRemove } = useEventActions(setData);
   const { user, isAuthenticated } = useUserStore();
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    date: "",
+    location: "",
+    capacity: 0,
+  });
+
+  useEffect(() => {
+    if(event) {
+      setFormData({
+        title: event.title,
+        description: event.description,
+        date: event.date,
+        location: event.location,
+        capacity: event.capacity,
+      });
+    }
+  }, [event]);
+
   if (!event || !eventId) return <div>Event not found</div>;
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === "capacity" ? Number(value) : value
+    }))
+  }
+
+  const handleUpdate = async () => {
+    try {
+      const updated = await api.patch(`/events/${eventId}`, formData);
+
+      setData(updated.data);
+      setIsEditing(false);
+    } catch (error) {
+      if(error instanceof Error) {
+        toast(error.message);
+      }
+    }
+  }
+
+  const handleCancel = () => {
+    if (event) {
+      setFormData({
+        title: event.title,
+        description: event.description,
+        date: event.date,
+        location: event.location,
+        capacity: event.capacity,
+      });
+    }
+    setIsEditing(false);
+  };
+
   const isJoined = event.isJoined;
   
   const isOrganizer = user?.id === event?.organizer?.id;
+  const inputClass =
+  "w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-4 py-3 outline-none transition";
+
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -35,25 +100,70 @@ const EventDetailsPage: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
             <div className="wrap-anywhere flex justify-between items-start mb-6">
-              <h1 className="text-3xl font-bold text-slate-900 leading-tight">
-                {event?.title}
-              </h1>
+              {isEditing ? (
+                <input
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  className={`text-3xl font-bold ${inputClass}`}
+                />
+              ) : (
+                <h1 className="text-3xl font-bold">
+                  {event.title}
+                </h1>
+              )}
               {isOrganizer && (
                 <div className="flex gap-2">
-                  <button type="button" className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">
-                    <Edit size={20} />
-                  </button>
-                  <button onClick={() => handleRemove(eventId)} type="button" className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
-                    <Trash2 size={20} />
-                  </button>
+                  {isEditing ? (
+                      <div className='row gap-1'>
+                        <button
+                          onClick={handleUpdate}
+                          type='button'
+                          className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-100 transition-all flex items-center gap-2"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type='button'
+                          onClick={handleCancel}
+                          className="bg-white border-2 border-slate-200 text-slate-500 px-5 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <button
+                          type='button'
+                          onClick={() => setIsEditing(true)}
+                          className="p-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                        >
+                          <Edit size={20} />
+                        </button>
+                        <button 
+                          onClick={() => handleRemove(eventId)} 
+                          type='button'
+                          className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      </>
+                    )}
                 </div>
               )}
             </div>
 
-            <p className="wrap-anywhere text-slate-600 leading-relaxed mb-8">
-              {event?.description}
-            </p>
-
+            {isEditing ? (
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="w-full border rounded-lg p-3"
+                />
+              ) : (
+                <p>{event.description}</p>
+            )}
+            
             <div className="grid grid-cols-2 gap-6 py-6 border-y border-slate-50">
               <div className="flex items-center text-slate-600">
                 <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl mr-4">
@@ -61,7 +171,17 @@ const EventDetailsPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-xs text-slate-400 uppercase font-bold tracking-wider">Date</p>
-                  <p className="font-semibold">{event?.date}</p>
+                  {isEditing ? (
+                    <input
+                      type="date"
+                      name="date"
+                      value={formData.date.slice(0, 16)}
+                      onChange={handleChange}
+                      className={`border rounded-lg p-2 ${inputClass}`}
+                    />
+                  ) : (
+                    <p>{new Date(event.date).toLocaleString()}</p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center text-slate-600">
@@ -70,6 +190,17 @@ const EventDetailsPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-xs text-slate-400 uppercase font-bold tracking-wider">Time</p>
+                  {isEditing ? (
+                    <input
+                      type="datetime-local"
+                      name="date"
+                      value={formData.date.slice(0, 16)}
+                      onChange={handleChange}
+                      className={`border rounded-lg p-2`}
+                    />
+                  ) : (
+                    <p>{new Date(event.date).toLocaleString()}</p>
+                  )}
                   <p className="font-semibold">{new Date(event?.date).getHours()} {new Date(event?.date).getMinutes()}</p>
                 </div>
               </div>
@@ -79,7 +210,16 @@ const EventDetailsPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-xs text-slate-400 uppercase font-bold tracking-wider">Location</p>
-                  <p className="font-semibold">{event?.location}</p>
+                  {isEditing ? (
+                    <input
+                      name="location"
+                      value={formData.location}
+                      onChange={handleChange}
+                      className={`border rounded-lg p-2`}
+                    />
+                  ) : (
+                    <p>{event.location}</p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center text-slate-600">
@@ -88,7 +228,17 @@ const EventDetailsPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-xs text-slate-400 uppercase font-bold tracking-wider">Capacity</p>
-                  <p className="font-semibold">{event?.participants?.length || 0} / {event?.capacity}</p>
+                  {isEditing ? (
+                    <input
+                      type="number"
+                      name="capacity"
+                      value={formData.capacity}
+                      onChange={handleChange}
+                      className={`border rounded-lg p-2`}
+                    />
+                  ) : (
+                    <p className="font-semibold">{event?.participantsCount || 0} / {event?.capacity}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -116,24 +266,30 @@ const EventDetailsPage: React.FC = () => {
         {/* Sidebar (Right Column) */}
         <div className="space-y-6">
           <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm sticky top-6">
-            <h3 className="font-bold text-slate-800 mb-4 text-center">Ready to join?</h3>
-            {isAuthenticated && (
-              <button
-                  type='button'
-                  onClick={isJoined ? () => handleLeave(eventId) : () => handleJoin(eventId)}
-                className={`cursor-pointer w-full py-4 rounded-2xl font-bold transition shadow-lg ${
-                  isJoined 
-                  ? "bg-white border-2 border-rose-500 text-rose-500 hover:bg-rose-50 shadow-rose-50" 
-                  : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-100"
-                }`}
-              >
-                {isJoined ? "Leave Event" : "Join Event"}
-              </button>
+            {isAuthenticated && isOrganizer ? (
+              <span>You can't join because you are an organizer</span>
+            ) : !isAuthenticated ? (
+              <span>Login to join this event</span>
+            ) : (
+               <>
+                <h3 className="font-bold text-slate-800 mb-4 text-center">Ready to join?</h3>
+                <button
+                    type='button'
+                    onClick={isJoined ? () => handleLeave(eventId) : () => handleJoin(eventId)}
+                  className={`cursor-pointer w-full py-4 rounded-2xl font-bold transition shadow-lg ${
+                    isJoined 
+                    ? "bg-white border-2 border-rose-500 text-rose-500 hover:bg-rose-50 shadow-rose-50" 
+                    : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-100"
+                  }`}
+                >
+                  {isJoined ? "Leave Event" : "Join Event"}
+                </button>
+              </>
             )}
             <p className="text-center text-xs text-slate-400 mt-4 px-4">
               {isJoined 
                 ? "You are registered for this event. You can leave at any time."
-                : `Only ${event?.capacity - (event?.participants?.length || 0)} spots left!`}
+                : `Only ${event?.capacity - (event?.participantsCount || 0)} spots left!`}
             </p>
           </div>
 
