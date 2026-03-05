@@ -3,12 +3,15 @@ import { ArrowLeft, Calendar, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { CreateEventSchema } from '../../common/schemas';
-import { api } from '../../api/axios';
+import { api } from '../../services/axios';
 import { toast } from 'react-toastify';
 import { appPath } from '../../common/enums';
+import { useApiMutation } from '../../hooks/useApiMutation';
+import { EventService } from '../../services/event.service';
 
 const CreateEventPage: React.FC = () => {
   const navigate = useNavigate();
+  const { execute: createEvent, isSubmitting } = useApiMutation(EventService.create);
 
   const initialValues = {
     title: '',
@@ -22,16 +25,17 @@ const CreateEventPage: React.FC = () => {
 
   const handleSubmit = async (values: typeof initialValues, { resetForm }: { resetForm: () => void }) => {
     try {
-      const { data} = await api.post("/events", values);
-      toast.success("Event successfully created");
-      resetForm();
-      navigate(appPath.EVENT_DETAILS.replace(":eventId", data.id));
+      const { data } = await createEvent(values);
+      if(data) {
+        toast.success("Event successfully created");
+        resetForm();
+        navigate(appPath.EVENT_DETAILS.replace(":eventId", data.id));
+      }
     } catch (error) {
       if(error instanceof Error) {
         toast.error(error.message);
       }
     }
-    console.log('Form Data:', values);
   };
 
   return (
@@ -200,7 +204,7 @@ const CreateEventPage: React.FC = () => {
                   type="submit"
                   className="w-full py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200 transition-all active:scale-[0.98] cursor-pointer"
                 >
-                  Create Event
+                  {isSubmitting ? "Creating..." : "Create Event" }
                 </button>
               </div>
             </Form>

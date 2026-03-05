@@ -1,18 +1,23 @@
 
 import { Calendar, Clock, MapPin, Users, Edit, Trash2, ChevronLeft } from 'lucide-react';
 import { Link, useParams } from 'react-router';
-import { useEventActions, useFetchData } from '../../hooks';
+import { useFetchData } from '../../hooks';
 import type { Event } from '../../common/types';
 import { useUserStore } from '../../storage/useAuthStore';
 import { appPath } from '../../common/enums';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { api } from '../../api/axios';
+import { EventService } from '../../services/event.service';
+import { useApiMutation } from '../../hooks/useApiMutation';
 
 const EventDetailsPage: React.FC = () => {
   const { eventId } = useParams();
   const { data: event, setData } = useFetchData<Event>(`/events/${eventId}`);
-  const { handleJoin, handleLeave, handleRemove } = useEventActions(setData);
+  const { execute: joinEvent } = useApiMutation(EventService.join);
+  const { execute: leaveEvent } = useApiMutation(EventService.leave);
+  const { execute: deleteEvent } = useApiMutation(EventService.delete);
+  const { execute: updateEvent } = useApiMutation(EventService.update);
+
   const { user, isAuthenticated } = useUserStore();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -51,16 +56,38 @@ const EventDetailsPage: React.FC = () => {
 
   const handleUpdate = async () => {
     try {
-      const updated = await api.patch(`/events/${eventId}`, formData);
-
-      setData(updated.data);
-      setIsEditing(false);
+      const { data } = await updateEvent(eventId, formData);
+      if(data) {
+        toast.success("Event successfully updated");
+        setData(data);
+        setIsEditing(false);
+      }
     } catch (error) {
       if(error instanceof Error) {
         toast(error.message);
       }
     }
   }
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    const time = formatTime(formData.date);
+
+    setFormData(prev => ({
+      ...prev,
+      date: `${newDate}T${time}`
+    }));
+  };
+
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTime = e.target.value;
+    const date = formatDate(formData.date);
+
+    setFormData(prev => ({
+      ...prev,
+      date: `${date}T${newTime}`
+    }));
+  };
 
   const handleCancel = () => {
     if (event) {
@@ -75,11 +102,26 @@ const EventDetailsPage: React.FC = () => {
     setIsEditing(false);
   };
 
+  const handleRemoveEvent = () => {
+    const isRemove = confirm("Are you sure you want to remove event?");
+    if(isRemove) {
+      deleteEvent(eventId);
+    }
+  }
+
   const isJoined = event.isJoined;
   
   const isOrganizer = user?.id === event?.organizer?.id;
   const inputClass =
   "w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl px-4 py-3 outline-none transition";
+
+  const formatDate = (date: string) => {
+    return new Date(date).toISOString().split("T")[0];
+  };
+
+  const formatTime = (date: string) => {
+    return new Date(date).toLocaleTimeString()
+  };
 
 
   return (
@@ -88,7 +130,7 @@ const EventDetailsPage: React.FC = () => {
         <button type="button"
           className="items-center text-slate-500 hover:text-indigo-600 transition mb-2"
         >
-          <Link to={appPath.ROOT} className='flex items-center cursor-pointer inline-block'>
+          <Link to={appPath.ROOT} className='flex items-center cursor-pointer'>
               <ChevronLeft size={20} />
               <span className="font-medium">Back to Events</span>
           </Link>
@@ -119,14 +161,14 @@ const EventDetailsPage: React.FC = () => {
                         <button
                           type='button'
                           onClick={() => setIsEditing(true)}
-                          className="p-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                          className="cursor-pointer p-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
                         >
                           <Edit size={20} />
                         </button>
                         <button 
-                          onClick={() => handleRemove(eventId)} 
+                          onClick={handleRemoveEvent} 
                           type='button'
-                          className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                          className="cursor-pointer p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
                         >
                           <Trash2 size={20} />
                         </button>
@@ -141,10 +183,10 @@ const EventDetailsPage: React.FC = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  className="w-full border rounded-lg p-3"
+                  className={`w-full border rounded-lg p-3 ${inputClass}`}
                 />
               ) : (
-                <p>{event.description}</p>
+                <p className='wrap-anywhere'>{event.description}</p>
             )}
             
             <div className="grid grid-cols-2 gap-6 py-6 border-y border-slate-50">
@@ -158,12 +200,12 @@ const EventDetailsPage: React.FC = () => {
                     <input
                       type="date"
                       name="date"
-                      value={formData.date.slice(0, 16)}
-                      onChange={handleChange}
+                      value={formatDate(formData.date)}
+                      onChange={handleDateChange}
                       className={`border rounded-lg p-2 ${inputClass}`}
                     />
                   ) : (
-                    <p>{new Date(event.date).toLocaleString()}</p>
+                    <p>{new Date(event.date).toLocaleDateString()}</p>
                   )}
                 </div>
               </div>
@@ -175,14 +217,14 @@ const EventDetailsPage: React.FC = () => {
                   <p className="text-xs text-slate-400 uppercase font-bold tracking-wider">Time</p>
                   {isEditing ? (
                     <input
-                      type="datetime-local"
+                      type="time" 
                       name="date"
-                      value={formData.date.slice(0, 16)}
-                      onChange={handleChange}
+                      value={formatTime(formData.date)}
+                      onChange={handleTimeChange}
                       className={`border rounded-lg p-2 ${inputClass}`}
                     />
                   ) : (
-                    <p>{new Date(event.date).toLocaleString()}</p>
+                    <p>{new Date(event.date).toLocaleTimeString()}</p>
                   )}
                 </div>
               </div>
@@ -247,7 +289,7 @@ const EventDetailsPage: React.FC = () => {
 
           {/* Participants Section */}
           <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-800 mb-6">Attending Participants</h2>
+            {event?.participants?.length === 0 ? <h2 className="text-xl font-bold text-slate-800 mb-6">No attending participants</h2> : <h2 className="text-xl font-bold text-slate-800 mb-6">Attending Participants</h2>}
             <div className="flex flex-wrap gap-3">
               {event?.participants?.map((person) => (
                 <div key={person.id} className="flex items-center bg-slate-50 border border-slate-100 px-4 py-2 rounded-full">
@@ -257,9 +299,6 @@ const EventDetailsPage: React.FC = () => {
                   <span className="text-sm font-medium text-slate-700">{person.name}</span>
                 </div>
               ))}
-              {event?.participantsCount === 0 && (
-                <p className="text-slate-400 text-sm italic">No one has joined yet. Be the first!</p>
-              )}
             </div>
           </div>
         </div>
@@ -276,7 +315,7 @@ const EventDetailsPage: React.FC = () => {
                 <h3 className="font-bold text-slate-800 mb-4 text-center">Ready to join?</h3>
                 <button
                     type='button'
-                    onClick={isJoined ? () => handleLeave(eventId) : () => handleJoin(eventId)}
+                    onClick={isJoined ? () => leaveEvent(eventId) : () => joinEvent(eventId)}
                   className={`cursor-pointer w-full py-4 rounded-2xl font-bold transition shadow-lg ${
                     isJoined 
                     ? "bg-white border-2 border-rose-500 text-rose-500 hover:bg-rose-50 shadow-rose-50" 

@@ -1,17 +1,20 @@
 import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LoginSchema } from '../../common/schemas';
 import { apiPath, appPath } from '../../common/enums';
-import { toast, ToastContainer } from 'react-toastify';
-import { api } from '../../api/axios';
+import { toast } from 'react-toastify';
+import { api } from '../../services/axios';
 import { useUserStore } from '../../storage/useAuthStore';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
     const { setUser } = useUserStore();
+    const location = useLocation();
     const initialValues = { email: '', password: '' }
+
+    const from = location?.state?.from?.pathname || appPath.ROOT;
 
     const handleSubmit = async (values: typeof initialValues, { setErrors }: any) => {
         try {
@@ -22,7 +25,7 @@ const LoginPage: React.FC = () => {
               token: access_token
             });
             toast.success("Account created successfully!");
-            navigate(appPath.ROOT);
+            navigate(from, { replace: true });
         } catch (error: any) {
             const backendError = error.response?.data;
 
@@ -99,7 +102,7 @@ const LoginPage: React.FC = () => {
 
           <p className="text-center text-sm text-slate-500 mt-8">
             Don't have an account? {' '}
-            <Link to={appPath.REGISTER} className="text-indigo-600 font-bold hover:text-indigo-700 underline-offset-4 hover:underline">
+            <Link to={appPath.REGISTER} state={{ from: location.state?.from }} className="text-indigo-600 font-bold hover:text-indigo-700 underline-offset-4 hover:underline">
               Create one for free
             </Link>
           </p>

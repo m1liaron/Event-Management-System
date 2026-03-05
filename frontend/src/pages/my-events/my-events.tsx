@@ -103,6 +103,7 @@ const MyEventsPage: React.FC = () => {
         <div>
           <h1 className="text-4xl font-bold tracking-tight">My Events</h1>
           <p className="text-slate-500 mt-1">View and manage your event calendar</p>
+          {events?.length === 0 && "You are not part of any events yet. Explore public events and join."}
         </div>
         <Link to={appPath.CREATE_EVENT}>
         <button type='button' className="flex cursor-pointer items-center gap-2 bg-[#6366f1] hover:bg-[#5558e3] text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-all">

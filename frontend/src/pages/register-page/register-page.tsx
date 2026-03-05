@@ -1,16 +1,18 @@
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { RegisterSchema } from "../../common/schemas";
 import { Lock, Mail, User } from "lucide-react";
-import { Link, useNavigate } from "react-router";
-import { toast, ToastContainer } from "react-toastify";
+import { Link, useLocation, useNavigate } from "react-router";
+import { toast } from "react-toastify";
 import { apiPath, appPath } from "../../common/enums";
-import { api } from "../../api/axios";
+import { api } from "../../services/axios";
 import { useUserStore } from "../../storage/useAuthStore";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { setUser } = useUserStore();
+  const location = useLocation();
   const initialValues = { name: '', email: '', password: '', confirmPassword: '' };
+  const from = location.state?.from?.pathname || appPath.ROOT;
 
   const handleSubmit = async (values: typeof initialValues, { setErrors }: any) => {
       try {
@@ -22,7 +24,7 @@ const RegisterPage = () => {
           });
           
           toast.success("Account created successfully!");
-          navigate(appPath.ROOT);
+          navigate(from, { replace: true });
       } catch (error: any) {
           const backendError = error.response?.data;
 

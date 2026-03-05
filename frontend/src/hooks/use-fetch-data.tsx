@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api } from "../api/axios";
+import { api } from "../services/axios";
 import { toast } from "react-toastify";
 
 const useFetchData = <T,>(url: string) => {

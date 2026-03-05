@@ -1,6 +1,6 @@
 
 import { useNavigate } from "react-router";
-import { api } from "../api/axios";
+import { api } from "../services/axios";
 import type { Event } from "../common/types";
 
 const useEventActions = (setData: any) => {

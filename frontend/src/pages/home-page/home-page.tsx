@@ -6,7 +6,7 @@ import { useEventActions, useFetchData } from "../../hooks";
 import { EventCardSkeleton } from "./components/event-card-skeleton/event-card-skeleton";
 import type { Event } from "../../common/types";
 import { EventsList } from "./components/event-list/event-list";
-import { api } from "../../api/axios";
+import { api } from "../../services/axios";
 import { v4 as uuidv4 } from 'uuid';
 
 const HomePage: React.FC = () => {

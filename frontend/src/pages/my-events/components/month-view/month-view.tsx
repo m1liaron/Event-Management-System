@@ -1,5 +1,7 @@
+import { Link } from "react-router";
 import type { Event } from "../../../../common/types";
 import { v4 as uuidv4 } from "uuid";
+import { appPath } from "../../../../common/enums";
 
 interface MonthViewProps {
   days: number[];
@@ -44,10 +46,12 @@ const MonthView: React.FC<MonthViewProps> = ({ days, padding, daysInMonth, start
                 return (
                   <div
                     key={event.id}
-                    className="wrap-anywhere mt-2 bg-[#eef2ff] text-[#4f46e5] text-[11px] px-2 py-1.5 rounded-md border border-[#c7d2fe] font-semibold"
+                    className={`wrap-anywhere mt-2 bg-[#eef2ff] text-[#4f46e5] text-[11px] px-2 py-1.5 rounded-md border border-[#c7d2fe] font-semibold`}
                   >
                     <span className="opacity-70">{time} - </span>
-                    <span className="truncate">{event.title.length > 20 ? `${event.title.slice(0, 20)}...` : event.title}</span>
+                    <Link  
+                    to={appPath.EVENT_DETAILS.replace(":eventId", event.id)}
+                    className="truncate">{event.title.length > 20 ? `${event.title.slice(0, 20)}...` : event.title}</Link>
                   </div>
                 );
               })}

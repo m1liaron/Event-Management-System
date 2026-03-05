@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CreateEventDto } from "./dto/create-event.dto";
@@ -16,6 +16,7 @@ export class EventsService {
 	async create(createEventDto: CreateEventDto, userId: string) {
 		const eventData = {
 			...createEventDto,
+			date: new Date(createEventDto.date),
 			organizer: { id: userId }
 		}
 		return await this.eventRepo.save(eventData);
@@ -90,10 +91,13 @@ export class EventsService {
 	async join(eventId: string, userId: string) {
 		const event = await this.eventRepo.findOne({
 			where: { id: eventId },
-			relations: ['participants']
+			relations: ['participants', 'organizer']
 		});
 
 		if (!event) throw new NotFoundException("Event not found");
+		if(event.organizer.id === userId) {
+			throw new ConflictException("You can't join event because you are an organizer");
+		}
 
 		const isAlreadyJoined = event.participants.some(user => user.id === userId);
 
@@ -102,7 +106,12 @@ export class EventsService {
 			await this.eventRepo.save(event);
 		}
 
-		return this.findOne(eventId, userId);
+		const foundEvent = this.findOne(eventId, userId);
+
+		return {
+			...foundEvent,
+			isJoined: true
+		}
 	}
 
 	async leave(eventId: string, userId: string) {
@@ -115,14 +124,21 @@ export class EventsService {
 
 		event.participants = event.participants.filter(user => user.id !== userId);
 
-		await this.eventRepo.save(event);
+		const foundEvent = await this.eventRepo.save(event);
 		
-		return this.findOne(eventId, userId);
+		return {
+			...foundEvent,
+			isJoined: false
+		}
 	}
 
-	async findByOrganizer(organizerId: string) {
-		return await this.eventRepo.find({
-			where: { organizer: { id: organizerId }}
-		})
+	async findByOrganizer(userId: string) {
+		return this.eventRepo
+			.createQueryBuilder("event")
+			.leftJoin("event.participants", "participant")
+			.leftJoinAndSelect("event.organizer", "organizer")
+			.where("organizer.id = :userId", { userId })
+			.orWhere("participant.id = :userId", { userId })
+			.getMany();
 	}
 }
