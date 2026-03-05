@@ -64,7 +64,7 @@ const HomePage: React.FC = () => {
 
 				{isLoading ? (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{[...Array(6)].map((_, i) => <EventCardSkeleton key={uuidv4()} />)}
+						{[...Array(6)].map(() => <EventCardSkeleton key={uuidv4()} />)}
 					</div>
 				) : (
 					<EventsList events={events} handleLeave={handleLeave} handleJoin={handleJoin} removeEvent={handleRemove} />

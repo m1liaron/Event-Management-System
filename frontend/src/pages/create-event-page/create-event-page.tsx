@@ -1,9 +1,8 @@
 import React from 'react';
-import { ArrowLeft, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { CreateEventSchema } from '../../common/schemas';
-import { api } from '../../services/axios';
 import { toast } from 'react-toastify';
 import { appPath } from '../../common/enums';
 import { useApiMutation } from '../../hooks/useApiMutation';

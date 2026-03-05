@@ -1,0 +1,23 @@
+# Local dependencies (Never copy these; install them inside the container)
+node_modules
+npm-debug.log
+
+# Local build artifacts (Prevent local 'dist' from overwriting container 'dist')
+dist
+build
+
+# Environment secrets (Handled by docker-compose, don't bake into the image)
+.env
+.env.*
+
+# Logs and temp files
+logs
+*.log
+.tmp
+.temp
+
+# Git and IDE metadata
+.git
+.vscode
+.idea
+.DS_Store
