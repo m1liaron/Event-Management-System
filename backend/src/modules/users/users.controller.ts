@@ -1,12 +1,11 @@
-import { Body, Controller, Get, UseGuards } from "@nestjs/common";
-import { CreateUserDto } from "./dto/create-user.dto";
+import { Body, Controller, Get, Request, UseGuards } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "./decorators/current-user.decorator";
 
 @Controller("users")
 export class UsersController {
-	constructor(private readonly _usersService: UsersService) {}
+	constructor(private readonly usersService: UsersService) {}
 
 	@UseGuards(JwtAuthGuard)
 	@Get("me")
@@ -14,6 +13,9 @@ export class UsersController {
 		return req.user
 	}
 
+	@UseGuards(JwtAuthGuard)
 	@Get("/me/events")
-	create(@Body() _createUserDto: CreateUserDto) {}
+	getEvents(@Request() req) {
+		return this.usersService.getEvents(req.user.id)
+	}
 }

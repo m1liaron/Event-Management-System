@@ -24,9 +24,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if(error.response?.status === 401) {
+        const token = useUserStore.getState().user?.token;
+        if (error.response?.status === 401 && token) {
             const { logout } = useUserStore.getState();
             toast.error("Session expired. Please login again.");
+            localStorage.removeItem("token");
             logout();
         }
         return Promise.reject(error);

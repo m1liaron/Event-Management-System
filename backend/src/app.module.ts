@@ -9,6 +9,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { EventsModule } from "./modules/events/events.module";
 import { User } from "./modules/users/entities/user.entity";
 import { UsersModule } from "./modules/users/users.module";
+import { Event } from "./modules/events/entities/event.entity";
 
 @Module({
 	imports: [
@@ -33,7 +34,7 @@ import { UsersModule } from "./modules/users/users.module";
 		EventsModule,
 		AuthModule,
 		UsersModule,
-		TypeOrmModule.forFeature([User]),
+		TypeOrmModule.forFeature([User, Event]),
 	],
 	controllers: [AppController],
 	providers: [AppService],

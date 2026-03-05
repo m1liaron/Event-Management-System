@@ -1,3 +1,7 @@
+import { Link } from "react-router";
+import type { Event } from "../../../../common/types";
+import { v4 as uuidv4 } from "uuid";
+import { appPath } from "../../../../common/enums";
 
 interface MonthViewProps {
   days: number[];
@@ -5,9 +9,10 @@ interface MonthViewProps {
   daysInMonth: number;
   startDayPadding: number;
   currentDate: Date;
+  eventsByDay: Record<number, Event[]>;
 }
 
-const MonthView: React.FC<MonthViewProps> = ({ days, padding, daysInMonth, startDayPadding, currentDate }) => {
+const MonthView: React.FC<MonthViewProps> = ({ days, padding, daysInMonth, startDayPadding, currentDate, eventsByDay }) => {
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const today = new Date();
 
@@ -21,11 +26,11 @@ const MonthView: React.FC<MonthViewProps> = ({ days, padding, daysInMonth, start
         ))}
       </div>
       <div className="grid grid-cols-7">
-        {padding.map((_, i) => (
-          <div key={`pad-${i}`} className="h-32 border-b border-r border-slate-200 bg-slate-50/30" />
+        {padding.map(() => (
+          <div key={`pad-${uuidv4}`} className="h-32 border-b border-r border-slate-200 bg-slate-50/30" />
         ))}
         {days.map((day) => {
-          const hasEvent = day === 8;
+          const dayEvents = eventsByDay[day] || [];
           const isToday = 
             day === today.getDate() && 
             currentDate.getMonth() === today.getMonth() && 
@@ -34,17 +39,27 @@ const MonthView: React.FC<MonthViewProps> = ({ days, padding, daysInMonth, start
           return (
             <div key={day} className={`h-32 border-b border-r border-slate-200 p-3 hover:bg-slate-50 relative group ${isToday ? 'ring-2 ring-inset ring-[#6366f1] z-10' : ''}`}>
               <span className={`text-sm font-medium ${isToday ? 'text-[#6366f1]' : 'text-slate-500'}`}>{day}</span>
-              {hasEvent && (
-                <div className="mt-2 bg-[#eef2ff] text-[#4f46e5] text-[11px] px-2 py-1.5 rounded-md border border-[#c7d2fe] font-semibold flex items-center gap-1">
-                  <span className="opacity-70">15:30 -</span>
-                  <span className="truncate">AI Conference</span>
-                </div>
-              )}
+              {dayEvents.map(event => {
+                const eventDate = new Date(event.date);
+                const time = eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                return (
+                  <div
+                    key={event.id}
+                    className={`wrap-anywhere mt-2 bg-[#eef2ff] text-[#4f46e5] text-[11px] px-2 py-1.5 rounded-md border border-[#c7d2fe] font-semibold`}
+                  >
+                    <span className="opacity-70">{time} - </span>
+                    <Link  
+                    to={appPath.EVENT_DETAILS.replace(":eventId", event.id)}
+                    className="truncate">{event.title.length > 20 ? `${event.title.slice(0, 20)}...` : event.title}</Link>
+                  </div>
+                );
+              })}
             </div>
           );
         })}
-        {Array.from({ length: (7 - ((daysInMonth + startDayPadding) % 7)) % 7 }).map((_, i) => (
-          <div key={`end-pad-${i}`} className="h-32 border-b border-r border-slate-200 bg-slate-50/30" />
+        {Array.from({ length: (7 - ((daysInMonth + startDayPadding) % 7)) % 7 }).map(() => (
+          <div key={`end-pad-${uuidv4()}`} className="h-32 border-b border-r border-slate-200 bg-slate-50/30" />
         ))}
       </div>
     </div>

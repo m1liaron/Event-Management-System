@@ -3,9 +3,15 @@ import { ArrowLeft, Calendar, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { CreateEventSchema } from '../../common/schemas';
+import { api } from '../../services/axios';
+import { toast } from 'react-toastify';
+import { appPath } from '../../common/enums';
+import { useApiMutation } from '../../hooks/useApiMutation';
+import { EventService } from '../../services/event.service';
 
 const CreateEventPage: React.FC = () => {
   const navigate = useNavigate();
+  const { execute: createEvent, isSubmitting } = useApiMutation(EventService.create);
 
   const initialValues = {
     title: '',
@@ -17,8 +23,19 @@ const CreateEventPage: React.FC = () => {
     visibility: 'public',
   };
 
-  const handleSubmit = (values: typeof initialValues) => {
-    console.log('Form Data:', values);
+  const handleSubmit = async (values: typeof initialValues, { resetForm }: { resetForm: () => void }) => {
+    try {
+      const { data } = await createEvent(values);
+      if(data) {
+        toast.success("Event successfully created");
+        resetForm();
+        navigate(appPath.EVENT_DETAILS.replace(":eventId", data.id));
+      }
+    } catch (error) {
+      if(error instanceof Error) {
+        toast.error(error.message);
+      }
+    }
   };
 
   return (
@@ -95,7 +112,6 @@ const CreateEventPage: React.FC = () => {
                       className={`w-full px-4 py-3 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/20 
                         ${errors.date && touched.date ? 'border-red-500' : 'border-slate-200 focus:border-indigo-500'}`}
                     />
-                    <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   </div>
                   <ErrorMessage name="date" component="div" className="text-red-500 text-xs mt-1 font-medium" />
                 </div>
@@ -114,7 +130,6 @@ const CreateEventPage: React.FC = () => {
                       className={`w-full px-4 py-3 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/20 
                         ${errors.time && touched.time ? 'border-red-500' : 'border-slate-200 focus:border-indigo-500'}`}
                     />
-                    <Clock className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   </div>
                   <ErrorMessage name="time" component="div" className="text-red-500 text-xs mt-1 font-medium" />
                 </div>
@@ -189,7 +204,7 @@ const CreateEventPage: React.FC = () => {
                   type="submit"
                   className="w-full py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200 transition-all active:scale-[0.98] cursor-pointer"
                 >
-                  Create Event
+                  {isSubmitting ? "Creating..." : "Create Event" }
                 </button>
               </div>
             </Form>

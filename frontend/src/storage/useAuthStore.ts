@@ -7,6 +7,7 @@ interface UserState {
     isAuthenticated: boolean;
     setUser: (user: User) => void;
     logout: () => void;
+    isLoading: boolean;
 }
 
 const useUserStore = create<UserState>()(
@@ -14,15 +15,18 @@ const useUserStore = create<UserState>()(
         (set) => ({
             user: null,
             isAuthenticated: false,
+            isLoading: true,
 
             setUser: (user) => set({
                 user,
                 isAuthenticated: true,
+                isLoading: false
             }),
 
             logout: () => set({
                 user: null,
-                isAuthenticated: false
+                isAuthenticated: false,
+                isLoading: false
             })
         }),
         {
