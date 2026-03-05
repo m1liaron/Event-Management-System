@@ -24,4 +24,4 @@ RUN npm install --omit=dev
 COPY --from=builder /app/dist ./dist
 
 # Start the app
-CMD ["node", "dist/main"]
+CMD ["sh", "-c", "npm run seed:prod && node dist/main"]
