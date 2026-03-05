@@ -1,17 +1,25 @@
-FROM node:20-alpine
+# Stage 1: Build Stage
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm ci
 
-RUN npm i -g serve
-
-COPY . . 
+COPY . .
 
 RUN npm run build
 
-EXPOSE 3000
+# Stage 2: Production Stage
+FROM nginx:stable-alpine
 
-CMD [ "serve", "-s", "dist" ]
+# Copy the static files from the build stage
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Copy a custom nginx config to handle React Router
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

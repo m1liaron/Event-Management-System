@@ -60,15 +60,17 @@ The project uses a centralized `.env` file at the root. Create a file named `.en
 
 ```env
 # --- DATABASE ---
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=mysecretpass
-POSTGRES_DB=event_db
-DB_HOST=db
+DB_USER=postgres
+DB_PASSWORD=secret45
+DB_NAME=event_management
+DB_HOST=localhost # localhost || db
 DB_PORT=5432
 
 # --- BACKEND ---
 JWT_SECRET=super_secret_key_123
-BACKEND_PORT=4000
+JWT_LIFETIME=30d
+PORT=4000
+CLIENT_URL=http://locahlost:5173
 
 # --- FRONTEND ---
 VITE_API_URL=http://localhost:4000
@@ -116,11 +118,11 @@ Upon the first launch via Docker, the database is automatically synchronized via
 
 ## 📝 Features Implemented
 
-* [ ] **JWT Auth:** Secure Sign-up/Login with hashed passwords.
-* [ ] **Public Event List:** View, Join, and Leave events with real-time capacity updates.
-* [ ] **Event Management:** Organizers can Create, Edit, and Delete events.
-* [ ] **Calendar View:** Monthly/Weekly view for joined events using `react-calendar`.
-* [ ] **Responsive UI:** Fully optimized for Mobile and Desktop via Tailwind.
+* [x] **JWT Auth:** Secure Sign-up/Login with hashed passwords.
+* [x] **Public Event List:** View, Join, and Leave events with real-time capacity updates.
+* [x] **Event Management:** Organizers can Create, Edit, and Delete events.
+* [x] **Calendar View:** Monthly/Weekly view for joined events.
+* [x] **Responsive UI:** Fully optimized for Mobile and Desktop with Tailwind.
 
 ---
 

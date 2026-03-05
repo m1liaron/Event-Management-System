@@ -16,12 +16,6 @@ export const envValidationSchema = yup.object({
 	DB_NAME: yup.string().required(),
 
 	DB_HOST: yup.string().required(),
-	DB_PORT: yup
-		.number()
-		.transform((_, originalValue) =>
-			originalValue !== undefined ? Number(originalValue) : undefined,
-		)
-		.required(),
 
 	JWT_SECRET: yup.string().required(),
 	JWT_LIFETIME: yup.string().default("30d"),
