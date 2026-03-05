@@ -1,4 +1,4 @@
-import type React from "react";
+import React from "react";
 import type { Event } from "../../../../common/types";
 import {
 	Calendar,
@@ -34,10 +34,58 @@ const EventItem: React.FC<EventItemProps> = ({
 }) => {
 	const { user } = useUserStore();
 
+	/**
+	 * Conditionals used for clearness instead of operators because using 2 conditionals in return would be unclear.
+	 * @returns React.FC
+	 */
+	const renderActionButtons = () => {
+		const isOrganizer = organizer.id === user?.id;
+		const isFull = participantsCount === capacity;
+
+		if (isOrganizer) {
+        return (
+            <div className="w-full py-3 text-center bg-slate-100 rounded-xl text-slate-500 font-medium text-sm">
+                You are the organizer
+            </div>
+        );
+    }
+
+    // 2. Already Joined State
+    if (isJoined) {
+        return (
+            <button
+                type="button"
+                onClick={() => handleLeave(id)}
+                className="cursor-pointer w-full py-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 hover:bg-rose-100 font-bold transition"
+            >
+                Leave Event
+            </button>
+        );
+    }
+
+    // 3. Event Full State
+    if (isFull) {
+        return (
+            <div className="w-full py-3 text-center bg-amber-50 rounded-xl text-amber-600 font-bold border border-amber-100">
+                Event is full
+            </div>
+        );
+    }
+
+    // 4. Default: Join State
+    return (
+        <button
+            type="button"
+            onClick={() => handleJoin(id)}
+            className="cursor-pointer w-full py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 font-bold shadow-lg shadow-emerald-100 transition"
+        >
+            Join Event
+        </button>
+    );
+	}
 
 	return (
-		<Link
-			to={appPath.EVENT_DETAILS.replace(":eventId", id)}
+		<div
 			key={id}
 			className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition duration-300"
 		>
@@ -62,11 +110,11 @@ const EventItem: React.FC<EventItemProps> = ({
 				<div className="space-y-3 mb-8">
 					<div className="flex items-center text-slate-400 text-sm">
 						<Calendar size={16} className="mr-3" />
-						<span>{date}</span>
+						<span>{new Date(date).toLocaleDateString()}</span>
 					</div>
 					<div className="flex items-center text-slate-400 text-sm">
 						<Clock size={16} className="mr-3" />
-						<span>{new Date(date).getHours()}:{new Date(date).getMinutes()}</span>
+						<span>{new Date(date).toLocaleTimeString().slice(0,5)}</span>
 					</div>
 					<div className="flex items-center text-slate-400 text-sm">
 						<MapPin size={16} className="mr-3" />
@@ -78,30 +126,11 @@ const EventItem: React.FC<EventItemProps> = ({
 					</div>
 				</div>
 			</div>
-			{isJoined ? (
-				<button
-					type="button"
-					onClick={() => handleLeave(id)}
-					className="cursor-pointer w-full py-3 rounded-xl bg-red-400 hover:bg-red-700 font-semibold transition"
-				>
-					<span className="font-medium">Leave Event</span>
-				</button>
-			) : participantsCount === capacity ? 
-				 <span>Event is full</span> 
-				: <button
-						type="button"
-						onClick={() => handleJoin(id)}
-						disabled={isJoined}
-						className={`cursor-pointer w-full py-3 rounded-xl font-semibold transition
-							${isJoined
-								? "bg-gray-400 cursor-not-allowed"
-								: "bg-emerald-600 hover:bg-emerald-700"}
-						`}
-					>
-						Join Event
-					</button>	 
-			}
-		</Link>
+		    {renderActionButtons()}
+			<Link to={appPath.EVENT_DETAILS.replace(":eventId", id)} className="mt-1 w-full py-3 text-center bg-green-300 rounded-xl text-slate-500 font-medium text-sm">
+                Details
+            </Link>
+		</div>
 	)
 };
 

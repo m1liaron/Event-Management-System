@@ -2,16 +2,45 @@ import React from "react";
 import {
 	Search,
 } from "lucide-react";
-import { useEventActions, useFetchData } from "../../hooks";
+import { useFetchData } from "../../hooks";
 import { EventCardSkeleton } from "./components/event-card-skeleton/event-card-skeleton";
 import type { Event } from "../../common/types";
 import { EventsList } from "./components/event-list/event-list";
-import { api } from "../../services/axios";
 import { v4 as uuidv4 } from 'uuid';
+import { EventService } from "../../services/event.service";
+import { useApiMutation } from "../../hooks/useApiMutation";
+import { toast } from "react-toastify";
 
 const HomePage: React.FC = () => {
 	const { isLoading, data: events, setData } = useFetchData<Event[]>("/events");
-	const { handleRemove, handleJoin, handleLeave } = useEventActions(setData);
+	const { execute: joinEvent } = useApiMutation(EventService.join);
+	const { execute: leaveEvent } = useApiMutation(EventService.leave);
+	const { execute: deleteEvent } = useApiMutation(EventService.delete);
+
+	const handleRemove = async(eventId: string) => {
+		const isConfirmed = confirm("Are you sure you want to delete event?");
+		if(isConfirmed) {
+			const { data } = await deleteEvent(eventId);  
+			if(data) {
+				toast("Event was successfully removed")
+				const filteredData = events?.filter(event => event.id !== data.id);
+				if(filteredData) {
+					setData(filteredData)
+				}
+			}
+		}
+	}	
+
+	const handleJoin = async (eventId: string) => {
+		const { data } = await joinEvent(eventId);  
+		setData(data);
+	}
+
+	const handleLeave = async (eventId: string) => {
+		const { data } = await leaveEvent(eventId);  
+		setData(data);
+	}
+	
 
 	return (
 		<div className="min-h-screen bg-white text-slate-900 font-sans">

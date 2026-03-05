@@ -9,10 +9,11 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { EventService } from '../../services/event.service';
 import { useApiMutation } from '../../hooks/useApiMutation';
+import { EventCardSkeleton } from '../home-page/components/event-card-skeleton/event-card-skeleton';
 
 const EventDetailsPage: React.FC = () => {
   const { eventId } = useParams();
-  const { data: event, setData } = useFetchData<Event>(`/events/${eventId}`);
+  const { data: event, setData, isLoading } = useFetchData<Event>(`/events/${eventId}`);
   const { execute: joinEvent } = useApiMutation(EventService.join);
   const { execute: leaveEvent } = useApiMutation(EventService.leave);
   const { execute: deleteEvent } = useApiMutation(EventService.delete);
@@ -41,6 +42,7 @@ const EventDetailsPage: React.FC = () => {
     }
   }, [event]);
 
+  if(isLoading) return <EventCardSkeleton/>
   if (!event || !eventId) return <div>Event not found</div>;
 
   const handleChange = (
@@ -123,7 +125,6 @@ const EventDetailsPage: React.FC = () => {
     return new Date(date).toLocaleTimeString()
   };
 
-
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Top Navigation */}
@@ -135,6 +136,8 @@ const EventDetailsPage: React.FC = () => {
               <span className="font-medium">Back to Events</span>
           </Link>
         </button>
+
+      {isLoading && <EventCardSkeleton/>}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
@@ -307,7 +310,9 @@ const EventDetailsPage: React.FC = () => {
         <div className="space-y-6">
           <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm sticky top-6">
             {isAuthenticated && isOrganizer ? (
-              <span>You can't join because you are an organizer</span>
+              <div className="w-full py-3 text-center bg-slate-100 rounded-xl text-slate-500 font-medium text-sm">
+                  You are the organizer
+              </div>
             ) : !isAuthenticated ? (
               <span>Login to join this event</span>
             ) : (
